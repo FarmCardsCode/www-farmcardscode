@@ -4,29 +4,51 @@
 {% block content %}
 <section class="hero">
   <p class="prompt">&gt; pathway analysis</p>
-  <h1>Cybersecurity Pathway</h1>
-  <p class="subtitle">
-    A guided route from introductory computing skills toward foundational cybersecurity readiness.
-  </p>
+  <h1>{{ pathway_intro.headline }}</h1>
+  <p class="subtitle">{{ pathway_intro.subtitle }}</p>
 </section>
 
-<section class="grid">
-  <div class="card">
-    <p class="label">STEP 1</p>
-    <h2>Build Technical Foundations</h2>
-    <p>Learn how computers, operating systems, networking, and code actually work.</p>
+<section class="section-block">
+  <p class="section-label">&gt; pathway roadmap</p>
+  <div class="roadmap-grid">
+    {% for item in steps %}
+    <article class="card roadmap-card {% if item.title == 'CompTIA Securit+' %}highlight-card{% endif %}">
+      <p class="label">{{ item.step }}</p>
+      <h2>{{ item.title }}</h2>
+      <p>{{ item.body }}</p>
+    </article>
+    {% endfor %}
   </div>
+</section>
 
+<section class="section-block">
+  <p class="section-label">&gt; student outcomes</p>
   <div class="card">
-    <p class="label">STEP 2</p>
-    <h2>Practice Security Thinking</h2>
-    <p>Understand defensive thinking, system exposure, risk, and secure configuration.</p>
+    <2>What Students Gain</h2>
+    <ul class="outcome-list">
+      {% for outcome in outcomes %}
+      <li>{{ outcome }}</li>
+      {% endfor %}
+    </ul>
   </div>
+</section>
 
-  <div class="card">
-    <p class="label">STEP 3</p>
-    <h2>Prepare for Security+</h2>
-    <p>Use classwork and lab practice to support later certification study and career exploration.</p>
+<section class="section-block">
+  <p class="section-label">&gt; certification goal</p>
+  <div class="card highlight-card">
+    <h2>CompTIA Security+</h2>
+    <p>
+      Security+ is the certification milestone that completes the pathway. 
+      It represents foundational cybersecurity knowledge and supports readiness 
+      for further study and career exploration.
+    </p>
+  </div>
+</section>
+
+<section class="section-block">
+  <p class="section-label">&gt; completion criteria</p>
+  <div class="fotter-panel">
+    <p>{{ completion }}</p>
   </div>
 </section>
 {% endblock %}
