@@ -1,17 +1,17 @@
-const text = "UNDER CONSTRUCTION";
-const target = document.getElementById("typewriter");
+document.querySelectorAll(".typewriter").forEach((typeTarget) => {
+  const text = typeTarget.textContent.trim();
+  typeTarget.textContent = "";
 
-if (target) {
   let i = 0;
 
   function typeWriter() {
     if (i < text.length) {
-      target.textContent += text.charAt(i);
+      typeTarget.textContent += text.charAt(i);
       i++;
       setTimeout(typeWriter, 85);
     } else {
       setInterval(() => {
-        target.textContent = target.textContent.endsWith("_")
+        typeTarget.textContent = typeTarget.textContent.endsWith("_")
           ? text
           : text + "_";
       }, 500);
@@ -19,7 +19,7 @@ if (target) {
   }
 
   typeWriter();
-}
+});
 
 function updateClock() {
   const clock = document.getElementById("clock");
@@ -29,4 +29,3 @@ function updateClock() {
 
 updateClock();
 setInterval(updateClock, 1000);
-
