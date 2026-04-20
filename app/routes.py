@@ -26,7 +26,24 @@ def index():
 
 @bp.get("/classes")
 def classes():
-    return render_template("classes.html")
+    cards = [
+        {
+            "label": "CODE FOUNDATIONS",
+            "title": "Intro to Computer Science",
+            "body": "Dive into the world of coding! This Computer Science course equips students with everything they need to build apps, games, and websites. Learn to think like a programmer, solve problems with logic, and understand the inner workings of computers. It's more than just code: it's a passport to a future filled with creativity, problem-solving, and endless possibilities!",
+        },
+        {
+            "label": "NETWORKING BASICS",
+            "title": "IT & Security",
+            "body": "This course is your next step in the exciting world of technology. Learn how computers connect and talk to each other through computer networking. Discover the secrets of ethical hacking, where you'll learn how to find weaknesses in systems to make them stronger. Get comfortable with Linux, a powerful operating system used by many tech experts. This course will give you a solid foundation in IT and security, opening doors to future possibilities.",
+        },
+        {
+            "label": "CYBER FUNDAMENTALS",
+            "title": "Cybersecurity",
+            "body": "Cybersecurity builds on your existing knowledge, pushing you toward master and the coveted CompTIA Security+ certification. Dive deeper into network security, encryption, incident response, and risk management, mastering the skills and knowledge demanded by IT professionals worldwide. Hone your vulnerability detection, threat analysis, and access control prowess, learning to secure not just information, but entire infrastructures. This intense course is your launchpad to a rewarding career in cybersecurity, equipping you with the tools and confidence to navigate the ever-evolving digital landscape. Prepare to conquer the Security+ exam, unlocking exciting professional opportunities, and become a certified guardian of the digital world!",
+        },
+    ]
+    return render_template("classes.html", cards=cards)
 
 @bp.get("/pathway")
 def pathway():
