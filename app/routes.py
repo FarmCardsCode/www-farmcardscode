@@ -7,7 +7,7 @@ def index():
     cards = [
         {
             "label": "STATUS",
-            "title": "UNDER ACTIVE DEVELOPMENT",
+            "title": "Under Construction",
             "body": "The site is now running as a Flask application and will expand into a full program portal."
         },
         {
