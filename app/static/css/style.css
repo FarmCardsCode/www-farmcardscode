@@ -215,10 +215,10 @@ body {
 
 .site-nav {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1.5rem;
-  padding: 0.95rem 1.5rem;
+  justify-content: space-evenly;
+  align-items: stretch;
+  width: 100%;
+  padding: 0;
   border-bottom: 1px solid var(--panel-border);
   background: linear-gradient(
     to bottom,
@@ -229,27 +229,29 @@ body {
 
 .nav-link {
   position: relative;
-  display: inline-block;
-  padding: 0.2rem 0;
+  flex: 1;
+  text-align: center;
+  padding: 1rem 0.75rem 0.9rem;
   color: var(--muted);
   text-decoration: none;
   font-family: "Courier New", Courier, monospace;
   font-size: 0.95rem;
   letter-spacing: 0.04em;
-  transition: color 0.2s ease, text-shadow 0.2s ease;
+  transition: color 0.2s ease, background 0.2s ease, text-shadow 0.2s ease;
 }
 
 .nav-link:hover {
   color: var(--text);
+  background: rgba(217, 4, 41, 0.05);
   text-shadow: 0 0 8px rgba(217, 4, 41, 0.16);
 }
 
 .nav-link::after {
   content: "";
   position: absolute;
-  left: 0;
-  bottom: -0.45rem;
-  width: 100%;
+  left: 12%;
+  bottom: 0;
+  width: 76%;
   height: 2px;
   background: var(--red);
   border-radius: 999px;
@@ -266,17 +268,18 @@ body {
 
 .nav-link.active {
   color: #ffffff;
+  background: rgba(217, 4, 41, 0.08);
 }
 
 @media (max-width: 640px) {
   .site-nav {
-    gap: 1rem;
-    padding: 0.85rem 1rem;
     flex-wrap: wrap;
   }
 
   .nav-link {
+    flex: 1 1 50%;
     font-size: 0.9rem;
+    padding: 0.9rem 0.5rem 0.8rem;
   }
 }
 
