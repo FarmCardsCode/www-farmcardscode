@@ -320,3 +320,20 @@ body {
 	line-height: 1.75;
 }
 
+.topic-summary {
+  margin-bottom: 1rem !important;
+  color: var(--muted) !important;
+  line-height: 1.75;
+}
+
+.topic-list {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.topic-list li {
+  margin-bottom: 0.65rem;
+  line-height: 1.7;
+  color: #dddddd;
+}
+

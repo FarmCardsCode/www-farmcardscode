@@ -18,6 +18,13 @@
       <p class="label">{{ card.label }}</p>
       <h2>{{ card.title }}</h2>
       <p>{{ card.body }}</p>
+
+      <p class="section-label">&gt; major topics</p>
+      <ul class="topic-list">
+        {% for topic in card.topics %}
+	<li>{{ topic }}</li>
+	{% endfor %}
+      </ul>
     </article>
     {% endfor %}
   </div>

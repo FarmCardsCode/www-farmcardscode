@@ -30,17 +30,34 @@ def classes():
         {
             "label": "CODE FOUNDATIONS",
             "title": "Intro to Computer Science",
-            "body": "Dive into the world of coding! This Computer Science course equips students with everything they need to build apps, games, and websites. Learn to think like a programmer, solve problems with logic, and understand the inner workings of computers. It's more than just code: it's a passport to a future filled with creativity, problem-solving, and endless possibilities!",
+            "body": (
+                "Build a strong foundation in coding, computing, networking, and digital safety through hands-on projects and real-world technology concepts."
+            ),
+            "topics": [
+                "Python Programming - build code, solve problems, and create interactive projects",
+                "Computing and Networking Basics - understand computers, the client-server model, and how devices communicate",
+                "Cybersecurity and Emerging Tech - explore digital safety, online threats, AI, and quantum computing",
+            ]
         },
         {
             "label": "NETWORKING BASICS",
             "title": "IT & Security",
-            "body": "This course is your next step in the exciting world of technology. Learn how computers connect and talk to each other through computer networking. Discover the secrets of ethical hacking, where you'll learn how to find weaknesses in systems to make them stronger. Get comfortable with Linux, a powerful operating system used by many tech experts. This course will give you a solid foundation in IT and security, opening doors to future possibilities.",
+            "body": "Take a deeper dive into systems, networks, Linux, and security tools through practical labs and technical investigation.",
+            "topics": [
+                "Networks and Infrastructure - learn DHCP, DNS, ports, protocols, addressing, and packet flow",
+                "Linux and Technical Tools - work with the command line, Wireshark, Nessus, and core IT workflows",
+                "Security Operations - study attack vectors, SQL/SQLi concepts, logging, compliance, and layered defense",
+            ],
         },
         {
             "label": "CYBER FUNDAMENTALS",
             "title": "Cybersecurity",
-            "body": "Cybersecurity builds on your existing knowledge, pushing you toward master and the coveted CompTIA Security+ certification. Dive deeper into network security, encryption, incident response, and risk management, mastering the skills and knowledge demanded by IT professionals worldwide. Hone your vulnerability detection, threat analysis, and access control prowess, learning to secure not just information, but entire infrastructures. This intense course is your launchpad to a rewarding career in cybersecurity, equipping you with the tools and confidence to navigate the ever-evolving digital landscape. Prepare to conquer the Security+ exam, unlocking exciting professional opportunities, and become a certified guardian of the digital world!",
+            "body": "Apply advanced security concepts through hands-on labs aligned to the CompTIA Security+ exam and real-world cybersecurity practice.",
+            "topics": [
+                "Offensive and Defensive Security - practice SQLi, Metasploit, pentesting concepts, and web app security",
+                "Cryptography and Trust - learn PKI, certificates, encryption, and secure communications",
+                "Security+ and Real-World Risk - connect governance, logging, GRC, physical security, and supply chain risk to Security+ preparation",
+            ],
         },
     ]
     return render_template("classes.html", cards=cards)
