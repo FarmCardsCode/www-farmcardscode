@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}News | Farm Cards Code{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <p class="prompt">&gt; feed status</p>
+  <h1>Latest News</h1>
+  <p class="subtitle">
+    Program updates, announcements, milestones, and student opportunities.
+  </p>
+</section>
+
+<section class="grid">
+  <div class="card">
+    <p class="label">UPDATE</p>
+    <h2>Portal Migration Complete</h2>
+    <p>The site is now being served by Flask through Gunicorn and cloudflared.</p>
+  </div>
+
+  <div class="card">
+    <p class="label">UPCOMING</p>
+    <h2>Content Expansion</h2>
+    <p>Classes, pathway information, and future program news will continue to be added.</p>
+  </div>
+</section>
+{% endblock %}
+
