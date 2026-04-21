@@ -12,7 +12,7 @@
   <p class="section-label">&gt; pathway roadmap</p>
   <div class="roadmap-grid">
     {% for item in steps %}
-    <article class="card roadmap-card {% if item.title == 'CompTIA Securit+' %}highlight-card{% endif %}">
+    <article class="card roadmap-card {% if item.title == 'CompTIA Security+' %}highlight-card{% endif %}">
       <p class="label">{{ item.step }}</p>
       <h2>{{ item.title }}</h2>
       <p>{{ item.body }}</p>
@@ -47,7 +47,7 @@
 
 <section class="section-block">
   <p class="section-label">&gt; completion criteria</p>
-  <div class="fotter-panel">
+  <div class="footer-panel">
     <p>{{ completion }}</p>
   </div>
 </section>
