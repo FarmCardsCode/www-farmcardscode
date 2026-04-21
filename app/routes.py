@@ -1,11 +1,11 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, abort
 from pathlib import Path
 import json
 from datetime import datetime
 
 bp = Blueprint("main", __name__)
 
-NEWS_DIR = Path(__file).resolve().parent / "content" / "news"
+NEWS_DIR = Path(__file__).resolve().parent / "content" / "news"
 
 def load_news_posts():
     posts = []
