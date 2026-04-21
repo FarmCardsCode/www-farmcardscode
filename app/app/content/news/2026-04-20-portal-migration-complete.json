@@ -1,0 +1,14 @@
+{
+  "slug": "portal-migration-complete",
+  "title": "Portal Migration Complete",
+  "date": "2026-04-21",
+  "category": "Update",
+  "summary": "The site is now served by Flask through Gunicorn and Cloudflare Tunnel.",
+  "body": [
+    "We completed the migration of the public program website to our self-hosted Flask stack.",
+    "This update gives us more flexibility to expand the portal with student projects, program updates, and future dynamic features.",
+    "The site continues to run on Debian infrastructure with Linux-native tooling and room to grow."
+  ],
+  "published": true,
+  "featured": true
+}

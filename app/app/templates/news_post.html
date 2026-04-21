@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{{ post.title }} | Farm Cards Code{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <p class="prompt">&gt; article view</p>
+  <h1 class="typewriter">{{ post.title }}</h1>
+  <p class="subtitle">{{ post.summary }}</p>
+</section>
+
+<section class="section-block">
+  <div class="card">
+    <p class="label">{{ post.category }}</p>
+    <p class="small">{{ post.date }}</p>
+
+    {% for paragraph in post.body %}
+    <p>{{ paragraph }}</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section-block">
+  <a class="button" href="{{ url_for('main.news') }}">
+    Back to News
+  </a>
+</section>
+{% endblock %}
+

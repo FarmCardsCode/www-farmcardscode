@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Farm Cards Code{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="noise"></div>
+  <div class="scanlines"></div>
+
+  <main class="terminal-shell">
+    <div class="terminal-bar">
+      <span class="dot red"></span>
+      <span class="dot dark"></span>
+      <span class="dot dark"></span>
+      <span class="title">guest@farmcardscode.org:~</span>
+    </div>
+
+    <nav class="site-nav">
+      <a href="{{ url_for('main.index') }}" class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}">
+	    Home
+      </a>
+      <a href="{{ url_for('main.classes') }}" class="nav-link {% if request.endpoint == 'main.classes' %}active{% endif %}">
+	    Classes
+      </a>
+      <a href="{{ url_for('main.pathway') }}" class="nav-link {% if request.endpoint == 'main.pathway' %}active{% endif %}">
+	    Pathway
+      </a>
+      <a href="{{ url_for('main.news') }}" class="nav-link {% if request.endpoint == 'main.news' %}active{% endif %}">
+	    News
+      </a>
+    </nav>
+    {% block content %}{% endblock %}
+  </main>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
+

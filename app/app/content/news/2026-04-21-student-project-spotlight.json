@@ -1,0 +1,14 @@
+{
+  "slug": "student-project-spotlight",
+  "title": "Student Project Spotlight Coming Soon",
+  "date": "2026-04-28",
+  "category": "Student Work",
+  "summary": "We are preparing a new section to feature selected student programming and cybersecurity projects.",
+  "body": [
+    "The upcoming showcase will highlight student-created work from across the program.",
+    "Featured projects may include Python applications, security-related tools, and interactive programming assignments.",
+    "Our goal is to present student work in a way that is safe, professional, and easy to explore."
+  ],
+  "published": true,
+  "featured": false
+}

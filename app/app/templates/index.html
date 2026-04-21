@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Home | Farm Cards Code{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <p class="prompt">&gt; system status</p>
+  <h1 class="typewriter">PROGRAM PORTAL ONLINE</h1>
+  <p class="subtitle">
+    Public portal for our programming and cybersecurity pathway.
+  </p>
+</section>
+
+<section class="grid">
+  {% for card in cards %}
+  <div class="card">
+    <p class="label">{{ card.label }}</p>
+    <h2>{{ card.title }}</h2>
+    <p>{{ card.body }}</p>
+
+    {% if card.label == "NODE TIME" %}
+    <h2 id="clock">--:--:--</h2>
+    <p class="small">Server local time</p>
+    {% endif %}
+  </div>
+  {% endfor %}
+</section>
+{% endblock %}
+

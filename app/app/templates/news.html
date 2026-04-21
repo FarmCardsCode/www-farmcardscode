@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}News | Farm Cards Code{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <p class="prompt">&gt; feed status</p>
+  <h1 class="typewriter">Latest News</h1>
+  <p class="subtitle">
+    Program updates, announcements, milestones, and student opportunities.
+  </p>
+</section>
+
+{% if featured_post %}
+<section class="section-block">
+  <p class="section-label">&gt; featured post</p>
+  <article class="card highlight-card">
+    <p class="label">{{ featured_post.category }}</p>
+    <h2>{{ featured_post.title }}</h2>
+    <p class="small">{{ featured_post.date }}</p>
+    <p>{{ featured_post.summary }}</p>
+    <a class="button" href="{{ url_for('main.news_post', slug=featured_post.slug) }}">
+      Read More
+    </a>
+  </article>
+</section>
+{% endif %}
+
+<section class="section-block">
+  <p class="section-label">&gt; recent posts</p>
+
+  {% if posts %}
+  <div class="grid">
+    {% for post in posts %}
+    <article class="card">
+      <p class="label">{{ post.category }}</p>
+      <h2>{{ post.title }}</h2>
+      <p class="small">{{ post.date }}</p>
+      <a class="button" href="{{ url_for('main.news_post', slug=post.slug)
+		Read More
+      </a>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="card">
+    <p class="label">STATUS</p>
+    <h2>No Published Posts Yet</h2>
+    <p>News articles will appear here once published.</p>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}
+
