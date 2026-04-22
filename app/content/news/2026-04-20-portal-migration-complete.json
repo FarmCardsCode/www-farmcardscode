@@ -1,7 +1,7 @@
 {
   "slug": "portal-migration-complete",
   "title": "Portal Migration Complete",
-  "date": "2026-04-21",
+  "date": "2026-04-20",
   "category": "Update",
   "summary": "The site is now served by Flask through Gunicorn and Cloudflare Tunnel.",
   "body": [

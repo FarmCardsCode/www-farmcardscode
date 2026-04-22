@@ -18,6 +18,10 @@
       <span class="title">guest@farmcardscode.org:~</span>
     </div>
 
+    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle theme">
+      <span class="theme-toggle-label">Theme</span>
+    </button>
+
     <nav class="site-nav">
       <a href="{{ url_for('main.index') }}" class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}">
 	    Home
