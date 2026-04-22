@@ -1,59 +1,75 @@
+/* ==========================================================================
+   THEME TOKENS
+   --------------------------------------------------------------------------
+   Centralized color, elevation, and effect variables for dark/light themes.
+   The site defaults to dark mode, with a light-theme override applied through
+   the [data-theme="light"] attribute or the user's system preference.
+   ========================================================================== */
+
 :root {
   color-scheme: dark light;
 
+  /* Page background and shell surfaces */
   --bg: #050505;
   --bg-alt: #0a0a0a;
-
   --panel: rgba(18, 18, 22, 0.96);
   --panel-2: rgba(12, 12, 16, 0.94);
   --terminal-bar-bg: rgba(0, 0, 0, 0.45);
 
+  /* Borders and outline accents */
   --panel-border: #5a1520;
   --panel-border-soft: rgba(255, 49, 92, 0.14);
 
+  /* Card surfaces */
   --card-bg: rgba(22, 22, 26, 0.94);
   --card-bg-2: rgba(16, 16, 20, 0.92);
   --card-inset: rgba(255, 49, 92, 0.04);
   --card-shadow: rgba(0, 0, 0, 0.28);
 
+  /* Navigation styling */
   --nav-bg: rgba(18, 18, 18, 0.42);
   --nav-bg-2: rgba(8, 8, 8, 0.2);
   --nav-divider: rgba(255, 255, 255, 0.05);
   --nav-active-bg: rgba(255, 49, 92, 0.08);
   --nav-active-text: #ffffff;
 
+  /* Highlight / featured card styling */
   --highlight-bg: rgba(24, 8, 10, 0.86);
   --highlight-inset: rgba(255, 49, 92, 0.08);
   --highlight-glow: rgba(255, 49, 92, 0.12);
 
+  /* Text hierarchy */
   --text: #f5f7fa;
   --muted: #b3bac5;
   --text-soft: #dde3ec;
 
+  /* Accent palette */
   --red: #ff315c;
   --red-dim: #a61a34;
   --red-glow: rgba(255, 49, 92, 0.22);
 
+  /* Global shadow colors */
   --shadow: rgba(0, 0, 0, 0.45);
   --shadow-red: rgba(255, 49, 92, 0.14);
 
-  --noise-opacity: 0.035;
-  --scanline-opacity: 0.06;
-  --noise-speed: 14s;
-  --scanline-speed: 7s;
+  /* CRT overlay tuning */
+  --noise-opacity: 0.028;
+  --scanline-opacity: 0.055;
+  --vignette-opacity: 0.14;
+  --crt-flicker-opacity: 0.02;
+  --scanline-size: 4px;
+  --scanline-speed: 12s;
+  --grain-speed: 14s;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .noise,
-  .scanlines {
-    animation: none;
-  }
-}
-
+/* --------------------------------------------------------------------------
+   Light theme overrides.
+   These variables are applied whenever the document root explicitly requests
+   the light theme through html[data-theme="light"].
+   -------------------------------------------------------------------------- */
 html[data-theme="light"] {
   --bg: #eceff3;
   --bg-alt: #dfe4ea;
-
   --panel: rgba(255, 255, 255, 0.96);
   --panel-2: rgba(245, 247, 250, 0.94);
   --terminal-bar-bg: rgba(232, 236, 241, 0.95);
@@ -87,11 +103,16 @@ html[data-theme="light"] {
   --shadow: rgba(25, 30, 40, 0.12);
   --shadow-red: rgba(193, 18, 58, 0.08);
 
-  --noise-opacity: 0.012;
-  --scanline-opacity: 0.025;
-  --noise-speed: 18s;
-  --scanline-speed: 12s;
+  /* CRT effects are intentionally much softer in light mode */
+  --noise-opacity: 0.009;
+  --scanline-opacity: 0.018;
+  --vignette-opacity: 0.05;
+  --crt-flicker-opacity: 0.007;
 }
+
+/* ==========================================================================
+   BASE RESET AND GLOBAL DOCUMENT STYLING
+   ========================================================================== */
 
 * {
   box-sizing: border-box;
@@ -106,6 +127,11 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* --------------------------------------------------------------------------
+   The page background uses layered gradients to add depth without requiring
+   any external image assets. This helps the terminal shell stand apart from
+   the surrounding page.
+   -------------------------------------------------------------------------- */
 body {
   position: relative;
   overflow-x: hidden;
@@ -115,11 +141,22 @@ body {
     linear-gradient(to bottom, var(--bg-alt), var(--bg) 68%);
 }
 
+/* Consistent muted text styling for secondary interface labels */
 .subtitle,
 .small,
 .title {
   color: var(--muted);
 }
+
+/* ==========================================================================
+   CRT OVERLAY LAYERS
+   --------------------------------------------------------------------------
+   These layers create the subtle analog-display treatment:
+   - .noise: fine film-grain texture
+   - .scanlines: faint horizontal display lines
+   - body::before: soft edge vignette
+   - body::after: very subtle brightness instability
+   ========================================================================== */
 
 .noise,
 .scanlines {
@@ -129,84 +166,115 @@ body {
   z-index: 0;
 }
 
+/* --------------------------------------------------------------------------
+   Fine-grain overlay.
+   This replaces the earlier radial-dot texture with layered linear patterns
+   that read more like screen grain than decorative particles.
+   -------------------------------------------------------------------------- */
 .noise {
   opacity: var(--noise-opacity);
   background-image:
-    repeating-radial-gradient(circle at 0 0, transparent 0, transparent 2px, #fff 3px);
-  background-size: 12px 12px;
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.045) 0px,
+      rgba(255, 255, 255, 0.045) 1px,
+      transparent 1px,
+      transparent 2px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.03) 0px,
+      rgba(255, 255, 255, 0.03) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.03) 0%,
+      transparent 35%,
+      rgba(255, 255, 255, 0.02) 70%,
+      transparent 100%
+    );
+  background-size:
+    3px 3px,
+    4px 4px,
+    100% 100%;
+  mix-blend-mode: soft-light;
   animation:
-    noise-drift var(--noise-speed) linear infinite,
-    noise-flicker 5s steps(6) infinite;
+    grain-drift var(--grain-speed) steps(8) infinite,
+    grain-flicker 5s steps(6) infinite;
 }
 
+/* --------------------------------------------------------------------------
+   Horizontal scanline overlay.
+   The goal is a restrained CRT-style surface treatment rather than a strong
+   retro effect. Motion remains deliberately slow and low contrast.
+   -------------------------------------------------------------------------- */
 .scanlines {
   opacity: var(--scanline-opacity);
-  background: repeating-linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.03) 0px,
-    rgba(255, 255, 255, 0.03) 1px,
-    transparent 2px,
-    transparent 4px
-  );
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.06) 0px,
+      rgba(255, 255, 255, 0.06) 1px,
+      transparent 1px,
+      transparent var(--scanline-size)
+    );
   animation:
-    scanline-shift var(--scanline-speed) linear infinite,
+    scanline-drift var(--scanline-speed) linear infinite,
     scanline-flicker 6s ease-in-out infinite;
 }
 
-@keyframes noise-drift {
-  0% {
-    transform: translate(0, 0);
-  }
-  25% {
-    transform: translate(-8px, 6px);
-  }
-  50% {
-    transform: translate(6px, -8px);
-  }
-  75% {
-    transform: translate(-4px, 4px);
-  }
-  100% {
-    translate(0, 0);
-  }
+/* --------------------------------------------------------------------------
+   Soft screen vignette.
+   This darkens the outer edges slightly so the page reads more like a display
+   surface and less like a flat browser canvas.
+   -------------------------------------------------------------------------- */
+body::before {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(
+      ellipse at center,
+      transparent 55%,
+      rgba(0, 0, 0, var(--vignette-opacity)) 100%
+    );
 }
 
-@keyframes noise-flicker {
-  0%, 100% {
-    opacity: var(--noise-opacity);;
-  }
-  20% {
-    opacity: calc(var(--noise-opacity) * 0.92);
-  }
-  40% {
-    opacity: calc(var(--noise-opacity) * 1.08);
-  }
-  60% {
-    opacity: calc(var(--noise-opacity) * 0.96);
-  }
-  80% {
-    opacity: calc(var(--noise-opacity) * 1.04);
-  }
+/* --------------------------------------------------------------------------
+   Micro-flicker layer.
+   This introduces a barely perceptible analog instability without becoming a
+   distraction. It should feel atmospheric, not noticeable.
+   -------------------------------------------------------------------------- */
+body::after {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  opacity: var(--crt-flicker-opacity);
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.15),
+      transparent 30%,
+      rgba(255, 255, 255, 0.08) 60%,
+      transparent 100%
+    );
+  animation: crt-flicker 0.18s infinite alternate;
 }
 
-@keyframes scanline-shift {
-  0% {
-    transform: translateY(0);
-  }
-  100% {
-    transform: translateY(4px);
-  }
-}
+/* ==========================================================================
+   MAIN SHELL / WINDOW CHROME
+   ========================================================================== */
 
-@keyframes scanline-flicker {
-  0%, 100% {
-	  opacity: var(--scanline-opacity);
-  }
-  50% {
-    opacity: calc(var(--scanline-opacity) * 0.88);
-  }
-}
-
+/* --------------------------------------------------------------------------
+   The terminal shell is the primary container for the faux-terminal layout:
+   titlebar, navigation, and page content.
+   -------------------------------------------------------------------------- */
 .terminal-shell {
   position: relative;
   z-index: 1;
@@ -222,6 +290,11 @@ body {
   overflow: hidden;
 }
 
+/* --------------------------------------------------------------------------
+   Top terminal titlebar.
+   This aligns the faux window controls on the left and the title / theme
+   control on the right.
+   -------------------------------------------------------------------------- */
 .terminal-bar {
   display: flex;
   align-items: center;
@@ -232,6 +305,7 @@ body {
   background: var(--terminal-bar-bg);
 }
 
+/* Left cluster for the window-control dots */
 .terminal-left {
   display: flex;
   align-items: center;
@@ -239,6 +313,7 @@ body {
   flex: 0 0 auto;
 }
 
+/* Right cluster for the title and theme toggle */
 .terminal-right {
   display: flex;
   align-items: center;
@@ -247,6 +322,7 @@ body {
   min-width: 0;
 }
 
+/* Faux window control dots */
 .dot {
   width: 10px;
   height: 10px;
@@ -263,6 +339,7 @@ body {
   background: #3a3a3a;
 }
 
+/* Terminal window title */
 .title {
   margin-left: 0;
   color: var(--muted);
@@ -271,12 +348,17 @@ body {
   white-space: nowrap;
 }
 
+/* ==========================================================================
+   GENERIC LAYOUT BLOCKS
+   ========================================================================== */
+
 .hero,
 .grid,
 .footer-panel {
   padding: 2rem 1.5rem 1.5rem;
 }
 
+/* Small monospace labels used throughout the UI */
 .prompt,
 .label {
   margin: 0 0 0.75rem 0;
@@ -286,6 +368,7 @@ body {
   letter-spacing: 0.04em;
 }
 
+/* Primary page headings */
 .hero h1 {
   margin: 0;
   font-size: clamp(2rem, 5vw, 4rem);
@@ -294,6 +377,7 @@ body {
   text-shadow: 0 0 10px rgba(255, 49, 92, 0.16);
 }
 
+/* Supporting hero copy */
 .subtitle {
   max-width: 62ch;
   margin-top: 1rem;
@@ -302,12 +386,22 @@ body {
   line-height: 1.6;
 }
 
+/* Responsive content grid used for cards and feed layouts */
 .grid {
   display: grid;
   gap: 1rem;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
+/* ==========================================================================
+   CARD SURFACES
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Shared card and footer panel styling.
+   Cards are elevated slightly above the shell background to preserve legibility
+   and improve the page's structural hierarchy.
+   -------------------------------------------------------------------------- */
 .card,
 .footer-panel {
   background: linear-gradient(to bottom, var(--card-bg), var(--card-bg-2));
@@ -340,11 +434,13 @@ body {
   margin-top: 0.9rem;
 }
 
+/* Small helper text */
 .small {
   color: var(--muted);
   font-size: 0.9rem;
 }
 
+/* Live clock treatment on the home page */
 #clock {
   color: var(--red);
   font-family: "Courier New", Courier, monospace;
@@ -352,6 +448,11 @@ body {
   letter-spacing: 0.08em;
 }
 
+/* ==========================================================================
+   BUTTONS AND CONTROLS
+   ========================================================================== */
+
+/* Primary inline action button */
 .button {
   display: inline-block;
   margin-top: 1rem;
@@ -370,153 +471,7 @@ body {
   box-shadow: 0 0 18px var(--red-glow);
 }
 
-.site-nav {
-  display: flex;
-  justify-content: space-evenly;
-  align-items: stretch;
-  width: 100%;
-  padding: 0;
-  border-bottom: 1px solid var(--panel-border);
-  background: linear-gradient(to bottom, var(--nav-bg), var(--nav-bg-2));
-}
-
-.nav-link {
-  position: relative;
-  flex: 1;
-  text-align: center;
-  padding: 1rem 0.75rem 0.9rem;
-  color: var(--muted);
-  text-decoration: none;
-  font-family: "Courier New", Courier, monospace;
-  font-size: 0.95rem;
-  letter-spacing: 0.04em;
-  transition: color 0.2s ease, background 0.2s ease, text-shadow 0.2s ease;
-}
-
-.nav-link:hover {
-  color: var(--text);
-  background: rgba(255, 49, 92, 0.05);
-  text-shadow: 0 0 8px var(--red-glow);
-}
-
-.nav-link::after {
-  content: "";
-  position: absolute;
-  left: 12%;
-  bottom: 0;
-  width: 76%;
-  height: 2px;
-  background: var(--red);
-  border-radius: 999px;
-  transform: scaleX(0);
-  transform-origin: center;
-  transition: transform 0.2s ease;
-  box-shadow: 0 0 10px var(--red-glow);
-}
-
-.nav-link:hover::after,
-.nav-link.active::after {
-  transform: scaleX(1);
-}
-
-.nav-link:not(:last-child) {
-  border-right: 1px solid var(--nav-divider);
-}
-
-.nav-link.active {
-  color: var(--nav-active-text);
-  background: var(--nav-active-bg);
-  box-shadow: inset 0 -1px 0 rgba(255, 49, 92, 0.25);
-}
-
-.section-block {
-  padding: 0 1.5rem 2rem;
-}
-
-.section-block .small {
-  margin-bottom: 1rem;
-}
-
-.section-label {
-  margin: 0 0 0.85rem 0;
-  color: var(--red);
-  font-family: "Courier New", Courier, monospace;
-  letter-spacing: 0.04em;
-}
-
-.roadmap-grid {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-}
-
-.roadmap-card {
-  position: relative;
-}
-
-.roadmap-card::after {
-  content: ">";
-  position: absolute;
-  right: 1rem;
-  bottom: 1rem;
-  color: rgba(255, 49, 92, 0.18);
-  font-family: "Courier New", Courier, monospace;
-  font-size: 1.5rem;
-}
-
-.highlight-card {
-  border-color: var(--red-dim);
-  box-shadow:
-    inset 0 0 0 1px var(--highlight-inset),
-    0 0 20px var(--highlight-glow);
-  background: var(--highlight-bg);
-}
-
-.outcome-list {
-  margin: 0;
-  padding-left: 1.2rem;
-}
-
-.outcome-list li,
-.topic-list li {
-  color: var(--text-soft);
-}
-
-.outcome-list li {
-  margin-bottom: 0.65rem;
-  line-height: 1.6;
-}
-
-.course-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.course-card h2 {
-  margin-bottom: 0.75rem;
-}
-
-.course-card p:last-child {
-  line-height: 1.75;
-}
-
-.topic-summary {
-  margin-bottom: 1rem !important;
-  color: var(--muted) !important;
-  line-height: 1.75;
-}
-
-.topic-list {
-  margin: 0;
-  padding-left: 1.25rem;
-}
-
-.topic-list li {
-  margin-bottom: 0.65rem;
-  line-height: 1.7;
-}
-
+/* Theme toggle button placed in the titlebar */
 .theme-toggle {
   appearance: none;
   border: 1px solid var(--panel-border);
@@ -545,11 +500,184 @@ body {
   display: inline-block;
 }
 
+/* ==========================================================================
+   NAVIGATION
+   ========================================================================== */
+
+/* Top navigation strip beneath the titlebar */
+.site-nav {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: stretch;
+  width: 100%;
+  padding: 0;
+  border-bottom: 1px solid var(--panel-border);
+  background: linear-gradient(to bottom, var(--nav-bg), var(--nav-bg-2));
+}
+
+/* Individual navigation tabs */
+.nav-link {
+  position: relative;
+  flex: 1;
+  text-align: center;
+  padding: 1rem 0.75rem 0.9rem;
+  color: var(--muted);
+  text-decoration: none;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  transition: color 0.2s ease, background 0.2s ease, text-shadow 0.2s ease;
+}
+
+.nav-link:hover {
+  color: var(--text);
+  background: rgba(255, 49, 92, 0.05);
+  text-shadow: 0 0 8px var(--red-glow);
+}
+
+/* Animated underline indicator */
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 12%;
+  bottom: 0;
+  width: 76%;
+  height: 2px;
+  background: var(--red);
+  border-radius: 999px;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.2s ease;
+  box-shadow: 0 0 10px var(--red-glow);
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+  transform: scaleX(1);
+}
+
+/* Subtle dividers between tabs */
+.nav-link:not(:last-child) {
+  border-right: 1px solid var(--nav-divider);
+}
+
+/* Active tab state */
+.nav-link.active {
+  color: var(--nav-active-text);
+  background: var(--nav-active-bg);
+  box-shadow: inset 0 -1px 0 rgba(255, 49, 92, 0.25);
+}
+
+/* ==========================================================================
+   CONTENT-SPECIFIC LAYOUTS
+   ========================================================================== */
+
+.section-block {
+  padding: 0 1.5rem 2rem;
+}
+
+.section-block .small {
+  margin-bottom: 1rem;
+}
+
+/* Section heading label */
+.section-label {
+  margin: 0 0 0.85rem 0;
+  color: var(--red);
+  font-family: "Courier New", Courier, monospace;
+  letter-spacing: 0.04em;
+}
+
+/* Roadmap / pathway grid */
+.roadmap-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+/* Decorative terminal-style marker on roadmap cards */
+.roadmap-card {
+  position: relative;
+}
+
+.roadmap-card::after {
+  content: ">";
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  color: rgba(255, 49, 92, 0.18);
+  font-family: "Courier New", Courier, monospace;
+  font-size: 1.5rem;
+}
+
+/* Featured / highlighted cards */
+.highlight-card {
+  border-color: var(--red-dim);
+  box-shadow:
+    inset 0 0 0 1px var(--highlight-inset),
+    0 0 20px var(--highlight-glow);
+  background: var(--highlight-bg);
+}
+
+/* Outcomes and topic lists */
+.outcome-list {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.outcome-list li,
+.topic-list li {
+  color: var(--text-soft);
+}
+
+.outcome-list li {
+  margin-bottom: 0.65rem;
+  line-height: 1.6;
+}
+
+/* Course page stacked layout */
+.course-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.course-card h2 {
+  margin-bottom: 0.75rem;
+}
+
+.course-card p:last-child {
+  line-height: 1.75;
+}
+
+/* Optional muted helper paragraph used above topic lists */
+.topic-summary {
+  margin-bottom: 1rem !important;
+  color: var(--muted) !important;
+  line-height: 1.75;
+}
+
+.topic-list {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.topic-list li {
+  margin-bottom: 0.65rem;
+  line-height: 1.7;
+}
+
+/* ==========================================================================
+   AUTOMATIC LIGHT MODE FALLBACK
+   --------------------------------------------------------------------------
+   If no explicit theme is set on the document, the site follows the user's
+   system preference for light mode.
+   ========================================================================== */
+
 @media (prefers-color-scheme: light) {
   html:not([data-theme]) {
     --bg: #eceff3;
     --bg-alt: #dfe4ea;
-
     --panel: rgba(255, 255, 255, 0.96);
     --panel-2: rgba(245, 247, 250, 0.94);
     --terminal-bar-bg: rgba(232, 236, 241, 0.95);
@@ -583,10 +711,30 @@ body {
     --shadow: rgba(25, 30, 40, 0.12);
     --shadow-red: rgba(193, 18, 58, 0.08);
 
-    --noise-opacity: 0.012;
-    --scanline-opacity: 0.025;
+    --noise-opacity: 0.009;
+    --scanline-opacity: 0.018;
+    --vignette-opacity: 0.05;
+    --crt-flicker-opacity: 0.007;
   }
 }
+
+/* ==========================================================================
+   MOTION REDUCTION ACCESSIBILITY SUPPORT
+   --------------------------------------------------------------------------
+   Users who prefer reduced motion should not receive animated CRT effects.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .noise,
+  .scanlines,
+  body::after {
+    animation: none;
+  }
+}
+
+/* ==========================================================================
+   RESPONSIVE ADJUSTMENTS
+   ========================================================================== */
 
 @media (max-width: 640px) {
   .terminal-shell {
@@ -625,3 +773,81 @@ body {
     text-overflow: ellipsis;
   }
 }
+
+/* ==========================================================================
+   CRT ANIMATION KEYFRAMES
+   --------------------------------------------------------------------------
+   These keyframes keep the display treatment subtle and atmospheric.
+   Motion is intentionally restrained to avoid distracting from content.
+   ========================================================================== */
+
+/* Gentle stepped drift for the grain layer */
+@keyframes grain-drift {
+  0% {
+    transform: translate(0, 0);
+  }
+  20% {
+    transform: translate(-1px, 1px);
+  }
+  40% {
+    transform: translate(1px, -1px);
+  }
+  60% {
+    transform: translate(-1px, 0);
+  }
+  80% {
+    transform: translate(1px, 1px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+/* Small irregular opacity fluctuations for screen grain */
+@keyframes grain-flicker {
+  0%,
+  100% {
+    opacity: var(--noise-opacity);
+  }
+  25% {
+    opacity: calc(var(--noise-opacity) * 0.92);
+  }
+  50% {
+    opacity: calc(var(--noise-opacity) * 1.08);
+  }
+  75% {
+    opacity: calc(var(--noise-opacity) * 0.96);
+  }
+}
+
+/* Slow vertical crawl for the scanline overlay */
+@keyframes scanline-drift {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 0 6px;
+  }
+}
+
+/* Minimal intensity breathing for scanlines */
+@keyframes scanline-flicker {
+  0%,
+  100% {
+    opacity: var(--scanline-opacity);
+  }
+  50% {
+    opacity: calc(var(--scanline-opacity) * 0.88);
+  }
+}
+
+/* Very subtle full-screen analog brightness instability */
+@keyframes crt-flicker {
+  0% {
+    opacity: calc(var(--crt-flicker-opacity) * 0.85);
+  }
+  100% {
+    opacity: calc(var(--crt-flicker-opacity) * 1.15);
+  }
+}
+
