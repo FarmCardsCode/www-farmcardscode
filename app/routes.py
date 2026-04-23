@@ -108,7 +108,7 @@ def classes():
 @bp.get("/pathway")
 def pathway():
     pathway_intro = {
-        "headline": "Cybersecurity Pathway",
+        "headline": "CTE Pathway",
         "subtitle": (
             "Students progress through a sequence of computer science and "
             "cybersecurity courses that leads to preparation for the "
@@ -161,7 +161,7 @@ def pathway():
     completion = (
         "A student completes the Cybersecurity Pathway by successfully completing "
         "Intro to Computer Science, IT & Security, and Cybersecurity, and then "
-        "earning the CompTIA Security+ certification."
+        "optionally earning the CompTIA Security+ certification."
     )
 
 
@@ -192,3 +192,4 @@ def news_post(slug):
         abort(404)
 
     return render_template("news_post.html", post=post)
+
