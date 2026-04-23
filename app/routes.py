@@ -108,7 +108,7 @@ def classes():
 @bp.get("/pathway")
 def pathway():
     pathway_intro = {
-        "headline": "CTE Pathway",
+        "headline": "Cybersecurity Pathway",
         "subtitle": (
             "Students progress through a sequence of computer science and "
             "cybersecurity courses that leads to preparation for the "
