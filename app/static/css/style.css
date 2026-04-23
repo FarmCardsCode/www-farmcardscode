@@ -53,17 +53,17 @@
   --shadow-red: rgba(255, 49, 92, 0.14);
 
   /* Overlay tuning */
-  --noise-opacity: 0.018;
-  --vignette-opacity: 0.14;
+  --noise-opacity: 0.028;
+  --vignette-opacity: 0.18;
 
   /* CRT scanline overlay tuning */
-  --scanline-sweep-opacity: 0.45;
-  --scanline-pattern-opacity: 0.22;
-  --scanline-sweep-color: rgba(0, 0, 0, 0.22);
-  --scanline-pattern-color: rgba(0, 0, 0, 0.16);
+  --scanline-sweep-opacity: 0.68;
+  --scanline-pattern-opacity: 0.36;
+  --scanline-sweep-color: rgba(0, 0, 0, 0.34);
+  --scanline-pattern-color: rgba(0, 0, 0, 0.26);
   --scanline-pattern-size: 4px;
-  --scanline-sweep-duration: 8s;
-  --scanline-pattern-duration: 1s;
+  --scanline-sweep-duration: 6.5s;
+  --scanline-pattern-duration: 0.85s;
 }
 
 /* --------------------------------------------------------------------------
