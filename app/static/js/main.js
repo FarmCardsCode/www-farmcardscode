@@ -2,18 +2,24 @@ document.querySelectorAll(".typewriter").forEach((typeTarget) => {
   const text = typeTarget.textContent.trim();
   typeTarget.textContent = "";
 
+  const textSpan = document.createElement("span");
+  const cursorSpan = document.createElement("span");
+  cursorSpan.className = "typewriter-cursor";
+  cursorSpan.textContent = "_";
+
+  typeTarget.appendChild(textSpan);
+  typeTarget.appendChild(cursorSpan);
+
   let i = 0;
 
   function typeWriter() {
     if (i < text.length) {
-      typeTarget.textContent += text.charAt(i);
+      textSpan.textContent += text.charAt(i);
       i++;
       setTimeout(typeWriter, 85);
     } else {
       setInterval(() => {
-        typeTarget.textContent = typeTarget.textContent.endsWith("_")
-          ? text
-          : text + "_";
+        cursorSpan.classList.toggle("typewriter-cursor-hidden");
       }, 500);
     }
   }

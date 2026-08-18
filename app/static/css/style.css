@@ -385,6 +385,14 @@ body::before {
   text-shadow: 0 0 10px rgba(255, 49, 92, 0.16);
 }
 
+/* Blinking cursor after typewriter hero titles. visibility (not display or
+   textContent) is toggled so the character's box stays reserved in the
+   layout at all times, preventing the last word from reflowing as it
+   blinks on and off. */
+.typewriter-cursor-hidden {
+  visibility: hidden;
+}
+
 /* Supporting hero copy */
 .subtitle {
   max-width: 62ch;
