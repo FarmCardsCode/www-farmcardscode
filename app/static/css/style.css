@@ -675,6 +675,12 @@ body::before {
   line-height: 1.7;
 }
 
+/* Widened terminal shell for pages hosting an embedded app, so the app gets
+   more horizontal room than the standard 1000px reading-width shell. */
+.terminal-shell.shell-wide {
+  width: min(1400px, calc(100% - 2rem));
+}
+
 /* Frame around embedded standalone student apps */
 .embed-frame {
   border: 1px solid var(--panel-border);
@@ -686,13 +692,42 @@ body::before {
   background: var(--card-bg);
 }
 
+.embed-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--panel-border);
+  background: var(--terminal-bar-bg);
+}
+
+.embed-fullscreen-btn {
+  margin-top: 0;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.85rem;
+}
+
 .embed-frame iframe {
   display: block;
   width: 100%;
-  height: 70vh;
-  min-height: 420px;
+  height: 75vh;
+  min-height: 480px;
   border: 0;
   background: #fff;
+}
+
+/* True fullscreen via the Fullscreen API: fill the viewport and drop the
+   frame chrome so the app gets the entire screen. */
+.embed-frame:fullscreen {
+  display: flex;
+  flex-direction: column;
+  border-radius: 0;
+  border: 0;
+}
+
+.embed-frame:fullscreen iframe {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
 }
 
 /* ==========================================================================

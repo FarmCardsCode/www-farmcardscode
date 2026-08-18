@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ app.title }} | Farm Cards Code{% endblock %}
+{% block shell_modifier %}{% if app.type == "embed" %}shell-wide{% endif %}{% endblock %}
 
 {% block content %}
 <section class="hero">
@@ -28,8 +29,14 @@
 {% if app.type == "embed" %}
 <section class="section-block">
   <p class="section-label">&gt; live app</p>
-  <div class="embed-frame">
+  <div class="embed-frame" id="embedFrame">
+    <div class="embed-toolbar">
+      <button type="button" class="button embed-fullscreen-btn" id="embedFullscreenBtn">
+        Fullscreen
+      </button>
+    </div>
     <iframe
+      id="embedIframe"
       src="{{ url_for('static', filename=app.url) }}"
       title="{{ app.title }}"
       loading="lazy"
