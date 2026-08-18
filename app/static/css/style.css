@@ -675,6 +675,26 @@ body::before {
   line-height: 1.7;
 }
 
+/* Frame around embedded standalone student apps */
+.embed-frame {
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow:
+    inset 0 0 0 1px var(--card-inset),
+    0 10px 24px var(--card-shadow);
+  background: var(--card-bg);
+}
+
+.embed-frame iframe {
+  display: block;
+  width: 100%;
+  height: 70vh;
+  min-height: 420px;
+  border: 0;
+  background: #fff;
+}
+
 /* ==========================================================================
    AUTOMATIC LIGHT MODE FALLBACK
    --------------------------------------------------------------------------

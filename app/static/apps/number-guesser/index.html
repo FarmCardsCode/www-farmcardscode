@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Number Guesser</title>
+<style>
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0b0d12;
+    color: #e8e8ec;
+    font-family: "Courier New", Courier, monospace;
+  }
+  .panel {
+    width: 100%;
+    max-width: 360px;
+    padding: 1.5rem;
+    text-align: center;
+  }
+  h1 {
+    font-size: 1.25rem;
+    margin: 0 0 0.5rem;
+  }
+  p {
+    color: #a9adba;
+    margin: 0 0 1rem;
+  }
+  input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.6rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #3a3f4b;
+    background: #14161d;
+    color: #e8e8ec;
+    font-family: inherit;
+    margin-bottom: 0.75rem;
+  }
+  button {
+    width: 100%;
+    padding: 0.7rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #ff315c;
+    background: rgba(255, 49, 92, 0.12);
+    color: #e8e8ec;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  button:hover {
+    background: rgba(255, 49, 92, 0.2);
+  }
+  #message {
+    margin-top: 1rem;
+    min-height: 1.5rem;
+  }
+</style>
+</head>
+<body>
+  <div class="panel">
+    <h1>Number Guesser</h1>
+    <p>Guess the number between 1 and 100.</p>
+    <input id="guess" type="number" min="1" max="100" placeholder="Enter a guess">
+    <button id="submit">Guess</button>
+    <div id="message"></div>
+  </div>
+
+  <script>
+    let target = Math.floor(Math.random() * 100) + 1;
+    let attempts = 0;
+    const input = document.getElementById("guess");
+    const message = document.getElementById("message");
+
+    document.getElementById("submit").addEventListener("click", () => {
+      const guess = Number(input.value);
+      if (!guess || guess < 1 || guess > 100) {
+        message.textContent = "Enter a number between 1 and 100.";
+        return;
+      }
+
+      attempts += 1;
+
+      if (guess === target) {
+        message.textContent = `Correct! The number was ${target}. Attempts: ${attempts}`;
+        target = Math.floor(Math.random() * 100) + 1;
+        attempts = 0;
+      } else if (guess < target) {
+        message.textContent = "Too low. Try again.";
+      } else {
+        message.textContent = "Too high. Try again.";
+      }
+    });
+
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        document.getElementById("submit").click();
+      }
+    });
+  </script>
+</body>
+</html>

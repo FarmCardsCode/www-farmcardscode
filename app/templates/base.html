@@ -36,6 +36,9 @@
       <a href="{{ url_for('main.pathway') }}" class="nav-link {% if request.endpoint == 'main.pathway' %}active{% endif %}">
 	    Pathway
       </a>
+      <a href="{{ url_for('main.apps') }}" class="nav-link {% if request.endpoint in ('main.apps', 'main.app_detail') %}active{% endif %}">
+	    Apps
+      </a>
       <a href="{{ url_for('main.news') }}" class="nav-link {% if request.endpoint == 'main.news' %}active{% endif %}">
 	    News
       </a>

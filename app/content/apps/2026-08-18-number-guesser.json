@@ -1,0 +1,16 @@
+{
+  "slug": "number-guesser",
+  "title": "Number Guesser",
+  "date": "2026-08-18",
+  "category": "Game",
+  "author": "Farm Cards Code",
+  "summary": "A simple browser game that challenges you to guess a random number between 1 and 100.",
+  "body": [
+    "This example app demonstrates how standalone student projects can be embedded directly into the site.",
+    "It is a self-contained HTML, CSS, and JavaScript build with no external dependencies, served from static/apps/ and embedded here in an iframe."
+  ],
+  "type": "embed",
+  "url": "apps/number-guesser/index.html",
+  "published": true,
+  "featured": true
+}
