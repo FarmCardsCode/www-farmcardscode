@@ -10,8 +10,7 @@
   color-scheme: dark light;
 
   /* Page background and shell surfaces */
-  --bg: #050505;
-  --bg-alt: #0a0a0a;
+  --bg: #1c1c1e;
   --panel: rgba(18, 18, 22, 0.96);
   --panel-2: rgba(12, 12, 16, 0.94);
   --terminal-bar-bg: rgba(0, 0, 0, 0.45);
@@ -61,7 +60,7 @@
   --scanline-pattern-opacity: 0.30;
   --scanline-sweep-color: rgba(155, 155, 155, 0.22);
   --scanline-pattern-color: rgba(155, 155, 155, 0.14);
-  --scanline-pattern-size: 6px;
+  --scanline-pattern-size: 10px;
   --scanline-sweep-duration: 5.5s;
   --scanline-pattern-duration: 0.75s;
 }
@@ -73,7 +72,6 @@
    -------------------------------------------------------------------------- */
 html[data-theme="light"] {
   --bg: #eceff3;
-  --bg-alt: #dfe4ea;
   --panel: rgba(255, 255, 255, 0.96);
   --panel-2: rgba(245, 247, 250, 0.94);
   --terminal-bar-bg: rgba(232, 236, 241, 0.95);
@@ -134,17 +132,9 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* --------------------------------------------------------------------------
-   The page background uses layered gradients to add depth without requiring
-   external images. This helps the terminal shell separate from the page.
-   -------------------------------------------------------------------------- */
 body {
   position: relative;
   overflow-x: hidden;
-  background:
-    radial-gradient(circle at top center, rgba(255, 49, 92, 0.12), transparent 32%),
-    radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.04), transparent 20%),
-    linear-gradient(to bottom, var(--bg-alt), var(--bg) 68%);
 }
 
 /* Consistent muted text styling for secondary interface labels */
@@ -711,12 +701,6 @@ body::before {
   line-height: 1.7;
 }
 
-/* Widened terminal shell for pages hosting an embedded app, so the app gets
-   more horizontal room than the standard 1000px reading-width shell. */
-.terminal-shell.shell-wide {
-  width: min(1400px, calc(100% - 2rem));
-}
-
 /* Frame around embedded standalone student apps */
 .embed-frame {
   border: 1px solid var(--panel-border);
@@ -776,7 +760,6 @@ body::before {
 @media (prefers-color-scheme: light) {
   html:not([data-theme]) {
     --bg: #eceff3;
-    --bg-alt: #dfe4ea;
     --panel: rgba(255, 255, 255, 0.96);
     --panel-2: rgba(245, 247, 250, 0.94);
     --terminal-bar-bg: rgba(232, 236, 241, 0.95);
