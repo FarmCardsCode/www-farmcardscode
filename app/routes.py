@@ -255,5 +255,12 @@ def app_detail(slug):
     if app_entry is None:
         abort(404)
 
+    # Embedded apps get a bare, full-viewport page - opening one should feel
+    # like launching the app itself, not visiting a page about it. Linked-out
+    # apps still get the normal descriptive page since visiting one just
+    # sends the visitor to another site anyway.
+    if app_entry["type"] == "embed":
+        return render_template("app_embed.html", app=app_entry)
+
     return render_template("app_detail.html", app=app_entry)
 

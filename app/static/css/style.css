@@ -701,55 +701,6 @@ body::before {
   line-height: 1.7;
 }
 
-/* Frame around embedded standalone student apps */
-.embed-frame {
-  border: 1px solid var(--panel-border);
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow:
-    inset 0 0 0 1px var(--card-inset),
-    0 10px 24px var(--card-shadow);
-  background: var(--card-bg);
-}
-
-.embed-toolbar {
-  display: flex;
-  justify-content: flex-end;
-  padding: 0.6rem 0.75rem;
-  border-bottom: 1px solid var(--panel-border);
-  background: var(--terminal-bar-bg);
-}
-
-.embed-fullscreen-btn {
-  margin-top: 0;
-  padding: 0.5rem 0.9rem;
-  font-size: 0.85rem;
-}
-
-.embed-frame iframe {
-  display: block;
-  width: 100%;
-  height: 75vh;
-  min-height: 480px;
-  border: 0;
-  background: #fff;
-}
-
-/* True fullscreen via the Fullscreen API: fill the viewport and drop the
-   frame chrome so the app gets the entire screen. */
-.embed-frame:fullscreen {
-  display: flex;
-  flex-direction: column;
-  border-radius: 0;
-  border: 0;
-}
-
-.embed-frame:fullscreen iframe {
-  flex: 1 1 auto;
-  height: auto;
-  min-height: 0;
-}
-
 /* ==========================================================================
    AUTOMATIC LIGHT MODE FALLBACK
    --------------------------------------------------------------------------

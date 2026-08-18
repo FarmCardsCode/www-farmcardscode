@@ -84,22 +84,3 @@ window.addEventListener("blur", () => setIdle(true));
 window.addEventListener("focus", () => setIdle(false));
 document.addEventListener("visibilitychange", () => setIdle(document.hidden));
 setIdle(document.hidden);
-
-const embedFrame = document.getElementById("embedFrame");
-const embedFullscreenBtn = document.getElementById("embedFullscreenBtn");
-
-if (embedFrame && embedFullscreenBtn) {
-  embedFullscreenBtn.addEventListener("click", () => {
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    } else {
-      embedFrame.requestFullscreen();
-    }
-  });
-
-  document.addEventListener("fullscreenchange", () => {
-    embedFullscreenBtn.textContent = document.fullscreenElement
-      ? "Exit Fullscreen"
-      : "Fullscreen";
-  });
-}
