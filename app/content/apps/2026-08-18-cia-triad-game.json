@@ -1,0 +1,15 @@
+{
+  "slug": "cia-triad-game",
+  "title": "Activity 1.1.1 - CIA Triad Card Game",
+  "date": "2026-08-18",
+  "category": "In-Class Activity",
+  "summary": "Drag scenario cards onto the CIA Triad x Information States matrix to practice classifying confidentiality, integrity, and availability concerns.",
+  "body": [
+    "Match each scenario card to the correct intersection of Confidentiality, Integrity, or Availability and the information state it involves: Storage, Transmission, or Processing.",
+    "Drag a card onto the matrix, or click a card and then click a cell. Use Check My Answers to see how many are correct, and Reset to shuffle and try again."
+  ],
+  "type": "embed",
+  "url": "apps/cia-triad-game/index.html",
+  "published": true,
+  "featured": true
+}

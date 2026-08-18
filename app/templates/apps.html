@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Apps | Farm Cards Code{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <p class="prompt">&gt; project index</p>
+  <h1 class="typewriter">Apps</h1>
+  <p class="subtitle">
+    Standalone web apps, games, and assignments built by students in the program.
+  </p>
+</section>
+
+{% if featured_app %}
+<section class="section-block">
+  <p class="section-label">&gt; featured build</p>
+  <article class="card highlight-card">
+    <p class="label">{{ featured_app.category }}</p>
+    <h2>{{ featured_app.title }}</h2>
+    <p class="small">{{ featured_app.date }}{% if featured_app.author %} &middot; {{ featured_app.author }}{% endif %}</p>
+    <p>{{ featured_app.summary }}</p>
+    <a class="button" href="{{ url_for('main.app_detail', slug=featured_app.slug) }}">
+      Open
+    </a>
+  </article>
+</section>
+{% endif %}
+
+<section class="section-block">
+  <p class="section-label">&gt; all apps</p>
+
+  {% if apps %}
+  <div class="grid">
+    {% for app in apps %}
+    <article class="card">
+      <p class="label">{{ app.category }}</p>
+      <h2>{{ app.title }}</h2>
+      <p class="small">{{ app.date }}{% if app.author %} &middot; {{ app.author }}{% endif %}</p>
+      <p>{{ app.summary }}</p>
+      <a class="button" href="{{ url_for('main.app_detail', slug=app.slug) }}">
+        Open
+      </a>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="card">
+    <p class="label">STATUS</p>
+    <h2>No Apps Published Yet</h2>
+    <p>Student-built apps, games, and assignments will appear here once published.</p>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

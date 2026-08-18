@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Activity 1.1.1 - CIA Triad Card Game</title>
+<style>
+  :root {
+    --confidentiality: #2b6cb0;
+    --integrity: #2f855a;
+    --availability: #b7791f;
+    --bg: #f7f8fa;
+    --card-bg: #ffffff;
+    --border: #d5dae0;
+    --text: #1f2933;
+    --muted: #52606d;
+    --bank-bg: #eef1f4;
+    --bank-border: #b0b8c1;
+    --row-head-bg: #f3f5f7;
+    --cell-bg: #fbfcfd;
+    --cell-hover: #e6f0fa;
+    --correct-border: #2f855a;
+    --correct-bg: #eafaf1;
+    --incorrect-border: #c53030;
+    --incorrect-bg: #fdeeee;
+    --btn-secondary-bg: #e2e8f0;
+    --btn-secondary-bg-hover: #cbd5e0;
+    --shadow: rgba(0,0,0,0.06);
+    --shadow-hover: rgba(0,0,0,0.12);
+  }
+  [data-theme="dark"] {
+    --confidentiality: #63a4e0;
+    --integrity: #5fbf87;
+    --availability: #e0ac4c;
+    --bg: #14181d;
+    --card-bg: #1f252c;
+    --border: #333c46;
+    --text: #e7ebef;
+    --muted: #9aa5b1;
+    --bank-bg: #1a1f26;
+    --bank-border: #3a4552;
+    --row-head-bg: #1b2129;
+    --cell-bg: #191e25;
+    --cell-hover: #24303d;
+    --correct-border: #48bb78;
+    --correct-bg: #16281e;
+    --incorrect-border: #e05353;
+    --incorrect-bg: #2c1717;
+    --btn-secondary-bg: #2b333d;
+    --btn-secondary-bg-hover: #38414d;
+    --shadow: rgba(0,0,0,0.3);
+    --shadow-hover: rgba(0,0,0,0.5);
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 20px;
+    padding-top: 64px;
+    transition: background 0.2s, color 0.2s;
+  }
+  .top-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  h1 {
+    font-size: 1.6rem;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    color: var(--muted);
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+  }
+  #themeToggle {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 100;
+    background: var(--btn-secondary-bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 6px var(--shadow);
+  }
+  #themeToggle:hover { background: var(--btn-secondary-bg-hover); }
+  .layout {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  #bank {
+    flex: 1 1 260px;
+    min-width: 240px;
+    background: var(--bank-bg);
+    border: 1px dashed var(--bank-border);
+    border-radius: 10px;
+    padding: 12px;
+    min-height: 200px;
+    transition: background 0.15s;
+  }
+  #bank.droppable-hover {
+    background: var(--cell-hover);
+  }
+  #bank h2 {
+    font-size: 1rem;
+    margin: 0 0 10px 0;
+  }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    cursor: grab;
+    box-shadow: 0 1px 2px var(--shadow);
+    transition: transform 0.1s, box-shadow 0.1s, border-color 0.1s, opacity 0.1s;
+    user-select: none;
+  }
+  .card:hover {
+    box-shadow: 0 2px 6px var(--shadow-hover);
+  }
+  .card.selected {
+    border-color: #3182ce;
+    box-shadow: 0 0 0 2px #3182ce33;
+  }
+  .card.dragging {
+    opacity: 0.4;
+    cursor: grabbing;
+  }
+  .card strong {
+    display: block;
+    font-size: 0.92rem;
+    margin-bottom: 3px;
+  }
+  .card span {
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.3;
+  }
+  .card.correct {
+    border-color: var(--correct-border);
+    background: var(--correct-bg);
+  }
+  .card.incorrect {
+    border-color: var(--incorrect-border);
+    background: var(--incorrect-bg);
+  }
+
+  #matrix-wrap {
+    flex: 3 1 500px;
+    overflow-x: auto;
+  }
+  table.matrix {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 640px;
+    background: var(--card-bg);
+  }
+  table.matrix th, table.matrix td {
+    border: 1px solid var(--border);
+    padding: 8px;
+    vertical-align: top;
+  }
+  table.matrix th.corner {
+    background: transparent;
+    border: none;
+  }
+  th.col-head {
+    text-align: left;
+    padding: 10px;
+  }
+  th.col-head .icon {
+    font-size: 1.3rem;
+  }
+  th.col-head .name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: block;
+    margin: 4px 0 2px 0;
+  }
+  th.col-head .desc {
+    font-weight: 400;
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.25;
+  }
+  th.col-head.confidentiality { border-top: 4px solid var(--confidentiality); }
+  th.col-head.integrity { border-top: 4px solid var(--integrity); }
+  th.col-head.availability { border-top: 4px solid var(--availability); }
+
+  th.row-head {
+    text-align: left;
+    width: 150px;
+    background: var(--row-head-bg);
+  }
+  th.row-head .name {
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: block;
+    margin-bottom: 3px;
+  }
+  th.row-head .desc {
+    font-weight: 400;
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.25;
+  }
+
+  td.cell {
+    width: 200px;
+    height: 90px;
+    background: var(--cell-bg);
+    transition: background 0.15s;
+  }
+  td.cell.droppable-hover {
+    background: var(--cell-hover);
+  }
+  td.cell.empty::after {
+    content: "drop here";
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-style: italic;
+  }
+
+  .controls {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  button {
+    font-size: 0.95rem;
+    padding: 10px 18px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  #checkBtn {
+    background: #3182ce;
+    color: #fff;
+  }
+  #checkBtn:hover { background: #2b6cb0; }
+  #resetBtn {
+    background: var(--btn-secondary-bg);
+    color: var(--text);
+  }
+  #resetBtn:hover { background: var(--btn-secondary-bg-hover); }
+  #score {
+    font-weight: 600;
+  }
+  #score.status-progress { color: var(--muted); }
+  #score.status-success { color: var(--correct-border); }
+  #score.status-fail { color: var(--incorrect-border); }
+  .hint {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-top: 10px;
+  }
+  @media (max-width: 700px) {
+    td.cell, th.row-head { width: auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div>
+    <h1>Activity 1.1.1 - CIA Triad Card Game</h1>
+    <p class="subtitle">Information States and Characteristics — drag a card onto the matrix cell where it belongs, or click a card then click a cell. Click/drag a placed card back to the bank to move it.</p>
+  </div>
+  <button id="themeToggle" aria-label="Toggle dark mode">
+    <span id="themeIcon">🌙</span>
+    <span id="themeLabel">Dark mode</span>
+  </button>
+</div>
+
+<div class="layout">
+  <div id="bank">
+    <h2>Cards to place (9)</h2>
+    <div id="cardList"></div>
+  </div>
+
+  <div id="matrix-wrap">
+    <table class="matrix">
+      <thead>
+        <tr>
+          <th class="corner"></th>
+          <th class="col-head confidentiality">
+            <span class="icon">🔒</span>
+            <span class="name">Confidentiality</span>
+            <span class="desc">Ensuring access to information is restricted only to users, processes, or devices that are authorized.</span>
+          </th>
+          <th class="col-head integrity">
+            <span class="icon">🔎</span>
+            <span class="name">Integrity</span>
+            <span class="desc">Ensuring that information is a true and accurate representation of data; prevention of unauthorized modification or destruction.</span>
+          </th>
+          <th class="col-head availability">
+            <span class="icon">🪪</span>
+            <span class="name">Availability</span>
+            <span class="desc">Ensuring reliable access to information by authorized users, processes, or devices.</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody id="matrixBody">
+        <!-- rows built by JS -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="controls">
+  <button id="checkBtn">Check My Answers</button>
+  <button id="resetBtn">Reset</button>
+  <span id="score"></span>
+</div>
+<p class="hint">Example: "Javier's Concern" — he wants to encrypt his hard drive. Encryption restricts access to those who need it (Confidentiality), and the data lives on his hard drive (Storage). So it belongs in the Confidentiality × Storage cell.</p>
+
+<script>
+  const rows = [
+    { key: "storage", name: "Storage", desc: "Information is stored when it is at rest, usually on a device such as a hard drive, memory, CD/DVD, or thumb drive.", icon: "💾" },
+    { key: "transmission", name: "Transmission", desc: "Information is in transmission when it flows from one location to another, usually over a medium such as network cables, Wi-Fi, or audio waves.", icon: "📡" },
+    { key: "processing", name: "Processing", desc: "Manipulating data within the computer. This includes calculations by the CPU, spreadsheets, programs, and other devices.", icon: "🖥️" }
+  ];
+  const cols = ["confidentiality", "integrity", "availability"];
+
+  const cards = [
+    {
+      id: "javier",
+      title: "Javier's Concern",
+      text: "Javier is concerned about sensitive data on his drive. He is going to use AES-based symmetric encryption to quickly password protect the data.",
+      answer: { col: "confidentiality", row: "storage" }
+    },
+    {
+      id: "bob",
+      title: "Unsure Bob",
+      text: "Bob is unsure how to send emails so that no one can read them except the intended recipients.",
+      answer: { col: "confidentiality", row: "transmission" }
+    },
+    {
+      id: "jain",
+      title: "Jain's Data",
+      text: "Jain's company works with sensitive data. To ensure its security, they have a rule to use only their private servers to compute/modify that data.",
+      answer: { col: "confidentiality", row: "processing" }
+    },
+    {
+      id: "backups",
+      title: "Weekly Backups",
+      text: "Charles creates weekly backups of his company's code repository on flash drives. Company rules require him to check these flash drives into a monitored facility to ensure they are not altered by anyone else.",
+      answer: { col: "integrity", row: "storage" }
+    },
+    {
+      id: "signature",
+      title: "Digital Signature",
+      text: "Jason emailed sensitive company information to a customer in another country. Jason digitally signed the message and the email was checked by the recipient and determined to be a true copy of the original email.",
+      answer: { col: "integrity", row: "transmission" }
+    },
+    {
+      id: "cpu",
+      title: "CPU Issue",
+      text: "Martha reads an article that warns of new CPUs incorrectly calculating large values.",
+      answer: { col: "integrity", row: "processing" }
+    },
+    {
+      id: "steve",
+      title: "Steve Again",
+      text: "When Steve saves files to the company computer, he does not look at the file path. Steve constantly calls IT asking them to find files on his computer. The CIO suggests a training on saving documents.",
+      answer: { col: "availability", row: "storage" }
+    },
+    {
+      id: "hotsites",
+      title: "Hot Sites",
+      text: "Rain's business relies on constant email communication with her clients. She maintains a hot site facility and a strong disaster recovery plan offsite to protect the flow of information between her company and her clients.",
+      answer: { col: "availability", row: "transmission" }
+    },
+    {
+      id: "power",
+      title: "Need More Power",
+      text: "Isabella is trying to run an application on a device with 4GB of RAM. When she launches it, the app runs slow and freezes periodically. IT informs her she needs a more powerful device.",
+      answer: { col: "availability", row: "processing" }
+    }
+  ];
+
+  // shuffle for display order in bank
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  let placement = {}; // cardId -> {col,row}
+  let selectedCardId = null;
+  let draggingCardId = null;
+  let cardOrder = shuffle(cards.map(c => c.id)); // randomized display order in the bank
+
+  const cardList = document.getElementById("cardList");
+  const matrixBody = document.getElementById("matrixBody");
+  const scoreEl = document.getElementById("score");
+  const bankEl = document.getElementById("bank");
+
+  // ---------- Dark mode ----------
+  const themeToggle = document.getElementById("themeToggle");
+  const themeIcon = document.getElementById("themeIcon");
+  const themeLabel = document.getElementById("themeLabel");
+
+  function applyTheme(theme) {
+    if (theme === "dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+      themeIcon.textContent = "☀️";
+      themeLabel.textContent = "Light mode";
+    } else {
+      document.documentElement.removeAttribute("data-theme");
+      themeIcon.textContent = "🌙";
+      themeLabel.textContent = "Dark mode";
+    }
+  }
+
+  const darkMediaQuery = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+
+  function initTheme() {
+    let saved = null;
+    try { saved = localStorage.getItem("cia-game-theme"); } catch (e) {}
+    if (saved) {
+      applyTheme(saved);
+    } else {
+      applyTheme(darkMediaQuery && darkMediaQuery.matches ? "dark" : "light");
+    }
+
+    // If the user hasn't manually chosen a theme, follow the OS setting live
+    if (darkMediaQuery) {
+      const handleSystemChange = (e) => {
+        let manualOverride = null;
+        try { manualOverride = localStorage.getItem("cia-game-theme"); } catch (err) {}
+        if (!manualOverride) {
+          applyTheme(e.matches ? "dark" : "light");
+        }
+      };
+      if (darkMediaQuery.addEventListener) {
+        darkMediaQuery.addEventListener("change", handleSystemChange);
+      } else if (darkMediaQuery.addListener) {
+        darkMediaQuery.addListener(handleSystemChange);
+      }
+    }
+  }
+
+  themeToggle.addEventListener("click", () => {
+    const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    const next = isDark ? "light" : "dark";
+    applyTheme(next);
+    try { localStorage.setItem("cia-game-theme", next); } catch (e) {}
+  });
+
+  function buildMatrix() {
+    matrixBody.innerHTML = "";
+    rows.forEach(r => {
+      const tr = document.createElement("tr");
+      const th = document.createElement("th");
+      th.className = "row-head";
+      th.innerHTML = `<span class="icon">${r.icon}</span><span class="name">${r.name}</span><span class="desc">${r.desc}</span>`;
+      tr.appendChild(th);
+      cols.forEach(c => {
+        const td = document.createElement("td");
+        td.className = "cell empty";
+        td.dataset.col = c;
+        td.dataset.row = r.key;
+        td.addEventListener("click", () => onCellClick(c, r.key));
+        addDropTarget(td, (id) => dropOnCell(id, c, r.key));
+        tr.appendChild(td);
+      });
+      matrixBody.appendChild(tr);
+    });
+  }
+
+  function renderCard(card, container) {
+    const div = document.createElement("div");
+    div.className = "card";
+    div.dataset.id = card.id;
+    div.draggable = true;
+    div.innerHTML = `<strong>${card.title}</strong><span>${card.text}</span>`;
+    div.addEventListener("click", () => onCardClick(card.id));
+    div.addEventListener("dragstart", (e) => {
+      draggingCardId = card.id;
+      selectedCardId = null;
+      div.classList.add("dragging");
+      e.dataTransfer.effectAllowed = "move";
+      try { e.dataTransfer.setData("text/plain", card.id); } catch (err) {}
+    });
+    div.addEventListener("dragend", () => {
+      draggingCardId = null;
+      div.classList.remove("dragging");
+    });
+    container.appendChild(div);
+    return div;
+  }
+
+  // Generic drag-and-drop target wiring, shared by matrix cells and the bank
+  function addDropTarget(el, onDrop) {
+    el.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      el.classList.add("droppable-hover");
+    });
+    el.addEventListener("dragleave", () => {
+      el.classList.remove("droppable-hover");
+    });
+    el.addEventListener("drop", (e) => {
+      e.preventDefault();
+      el.classList.remove("droppable-hover");
+      const id = draggingCardId || (e.dataTransfer && e.dataTransfer.getData("text/plain"));
+      if (id) onDrop(id);
+      draggingCardId = null;
+    });
+  }
+
+  function dropOnCell(cardId, col, row) {
+    selectedCardId = cardId;
+    onCellClick(col, row);
+  }
+
+  function dropOnBank(cardId) {
+    if (placement[cardId]) {
+      delete placement[cardId];
+      selectedCardId = null;
+      renderAll();
+    }
+  }
+
+  function onCardClick(cardId) {
+    // if card is placed, clicking it in the cell returns it to bank
+    if (placement[cardId]) {
+      delete placement[cardId];
+      selectedCardId = null;
+      renderAll();
+      return;
+    }
+    // toggle selection in bank
+    selectedCardId = (selectedCardId === cardId) ? null : cardId;
+    renderAll();
+  }
+
+  function onCellClick(col, row) {
+    const cell = matrixBody.querySelector(`td[data-col="${col}"][data-row="${row}"]`);
+    const occupantId = Object.keys(placement).find(id => placement[id].col === col && placement[id].row === row);
+
+    if (selectedCardId) {
+      // place selected card here, bump out any occupant back to bank
+      if (occupantId && occupantId !== selectedCardId) {
+        delete placement[occupantId];
+      }
+      placement[selectedCardId] = { col, row };
+      selectedCardId = null;
+      renderAll();
+    } else if (occupantId) {
+      // no card selected: clicking an occupied cell selects that card for moving
+      selectedCardId = occupantId;
+      delete placement[occupantId];
+      renderAll();
+    }
+  }
+
+  function renderAll() {
+    // clear feedback classes
+    scoreEl.textContent = "";
+    scoreEl.classList.remove("status-progress", "status-success", "status-fail");
+    cardList.innerHTML = "";
+
+    // rebuild matrix cells
+    matrixBody.querySelectorAll("td.cell").forEach(td => {
+      td.innerHTML = "";
+      td.classList.remove("correct", "incorrect");
+      const col = td.dataset.col, row = td.dataset.row;
+      const occupantId = Object.keys(placement).find(id => placement[id].col === col && placement[id].row === row);
+      if (occupantId) {
+        td.classList.remove("empty");
+        const card = cards.find(c => c.id === occupantId);
+        const el = renderCard(card, td);
+        if (occupantId === selectedCardId) el.classList.add("selected");
+      } else {
+        td.classList.add("empty");
+      }
+    });
+
+    // rebuild bank with unplaced cards, in the current shuffled order
+    const unplaced = cardOrder
+      .map(id => cards.find(c => c.id === id))
+      .filter(card => !placement[card.id]);
+    unplaced.forEach(card => {
+      const el = renderCard(card, cardList);
+      if (card.id === selectedCardId) el.classList.add("selected");
+    });
+  }
+
+  function checkAnswers() {
+    let correctCount = 0;
+    const placedCount = Object.keys(placement).length;
+
+    matrixBody.querySelectorAll("td.cell").forEach(td => {
+      td.classList.remove("correct", "incorrect");
+      const col = td.dataset.col, row = td.dataset.row;
+      const occupantId = Object.keys(placement).find(id => placement[id].col === col && placement[id].row === row);
+      const cardEl = td.querySelector(".card");
+      if (!cardEl) return;
+      const card = cards.find(c => c.id === occupantId);
+      const isCorrect = card.answer.col === col && card.answer.row === row;
+      cardEl.classList.add(isCorrect ? "correct" : "incorrect");
+      if (isCorrect) correctCount++;
+    });
+
+    scoreEl.classList.remove("status-progress", "status-success", "status-fail");
+    if (placedCount < cards.length) {
+      scoreEl.textContent = `${correctCount} / ${cards.length} correct so far — place all ${cards.length} cards to finish.`;
+      scoreEl.classList.add("status-progress");
+    } else if (correctCount === cards.length) {
+      scoreEl.textContent = `All ${cards.length} correct! Great job!`;
+      scoreEl.classList.add("status-success");
+    } else {
+      scoreEl.textContent = `${correctCount} / ${cards.length} correct — review the red cards and try again.`;
+      scoreEl.classList.add("status-fail");
+    }
+  }
+
+  function resetGame() {
+    placement = {};
+    selectedCardId = null;
+    cardOrder = shuffle(cards.map(c => c.id));
+    scoreEl.textContent = "";
+    scoreEl.classList.remove("status-progress", "status-success", "status-fail");
+    renderAll();
+  }
+
+  document.getElementById("checkBtn").addEventListener("click", checkAnswers);
+  document.getElementById("resetBtn").addEventListener("click", resetGame);
+
+  addDropTarget(bankEl, (id) => dropOnBank(id));
+
+  initTheme();
+  buildMatrix();
+  renderAll();
+</script>
+
+</body>
+</html>

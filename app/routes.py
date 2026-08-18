@@ -6,6 +6,7 @@ from datetime import datetime
 bp = Blueprint("main", __name__)
 
 NEWS_DIR = Path(__file__).resolve().parent / "content" / "news"
+APPS_DIR = Path(__file__).resolve().parent / "content" / "apps"
 
 def load_news_posts():
     posts = []
@@ -43,6 +44,49 @@ def get_news_post_by_slug(slug):
     for post in posts:
         if post["slug"] == slug:
             return post
+    return None
+
+def load_apps():
+    apps = []
+
+    if not APPS_DIR.exists():
+        return apps
+
+    for file_path in APPS_DIR.glob("*.json"):
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                app_entry = json.load(f)
+
+            # Skip unpublished apps
+            if not app_entry.get("published", False):
+                continue
+
+            # Basic required fields check
+            required_fields = ["slug", "title", "date", "category", "summary", "type", "url"]
+            if not all(field in app_entry for field in required_fields):
+                continue
+
+            # type must be "embed" (a static app bundled under static/apps/)
+            # or "link" (an external URL the student's project is hosted at)
+            if app_entry["type"] not in ("embed", "link"):
+                continue
+
+            # Parse date for sorting
+            app_entry["_date_obj"] = datetime.strptime(app_entry["date"], "%Y-%m-%d")
+            apps.append(app_entry)
+
+        except (json.JSONDecodeError, ValueError):
+            # Skip malformed files
+            continue
+    apps.sort(key=lambda a: a["_date_obj"], reverse=True)
+
+    return apps
+
+def get_app_by_slug(slug):
+    apps = load_apps()
+    for app_entry in apps:
+        if app_entry["slug"] == slug:
+            return app_entry
     return None
 
 @bp.get("/")
@@ -192,4 +236,31 @@ def news_post(slug):
         abort(404)
 
     return render_template("news_post.html", post=post)
+
+@bp.get("/apps")
+def apps():
+    apps_list = load_apps()
+    featured_app = next((a for a in apps_list if a.get("featured")), None)
+
+    return render_template(
+        "apps.html",
+        apps=apps_list,
+        featured_app=featured_app,
+    )
+
+@bp.get("/apps/<slug>")
+def app_detail(slug):
+    app_entry = get_app_by_slug(slug)
+
+    if app_entry is None:
+        abort(404)
+
+    # Embedded apps get a bare, full-viewport page - opening one should feel
+    # like launching the app itself, not visiting a page about it. Linked-out
+    # apps still get the normal descriptive page since visiting one just
+    # sends the visitor to another site anyway.
+    if app_entry["type"] == "embed":
+        return render_template("app_embed.html", app=app_entry)
+
+    return render_template("app_detail.html", app=app_entry)
 

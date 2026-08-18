@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}{{ app.title }} | Farm Cards Code{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <p class="prompt">&gt; app view</p>
+  <h1 class="typewriter">{{ app.title }}</h1>
+  <p class="subtitle">{{ app.summary }}</p>
+</section>
+
+<section class="section-block">
+  <div class="card">
+    <p class="label">{{ app.category }}</p>
+    <p class="small">{{ app.date }}{% if app.author %} &middot; {{ app.author }}{% endif %}</p>
+
+    {% for paragraph in app.body %}
+    <p>{{ paragraph }}</p>
+    {% endfor %}
+
+    <a class="button" href="{{ app.url }}" target="_blank" rel="noopener noreferrer">
+      Launch App
+    </a>
+  </div>
+</section>
+
+<section class="section-block">
+  <a class="button" href="{{ url_for('main.apps') }}">
+    Back to Apps
+  </a>
+</section>
+{% endblock %}
