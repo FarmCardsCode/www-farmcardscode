@@ -1,26 +1,17 @@
+// The blinking cursor itself is a CSS ::after pseudo-element (see
+// style.css) rather than DOM text, so it never affects this element's
+// rendered width — only the character reveal happens here.
 document.querySelectorAll(".typewriter").forEach((typeTarget) => {
   const text = typeTarget.textContent.trim();
   typeTarget.textContent = "";
-
-  const textSpan = document.createElement("span");
-  const cursorSpan = document.createElement("span");
-  cursorSpan.className = "typewriter-cursor";
-  cursorSpan.textContent = "_";
-
-  typeTarget.appendChild(textSpan);
-  typeTarget.appendChild(cursorSpan);
 
   let i = 0;
 
   function typeWriter() {
     if (i < text.length) {
-      textSpan.textContent += text.charAt(i);
+      typeTarget.textContent += text.charAt(i);
       i++;
       setTimeout(typeWriter, 85);
-    } else {
-      setInterval(() => {
-        cursorSpan.classList.toggle("typewriter-cursor-hidden");
-      }, 500);
     }
   }
 
@@ -80,6 +71,19 @@ window
   });
 
 updateThemeButton();
+
+// The scanline sweep and noise jitter are full-viewport composites running
+// every frame; neither is worth the cost while the tab is hidden or
+// unfocused, so both pause via html[data-idle] (see style.css) and resume
+// exactly where they left off.
+function setIdle(idle) {
+  document.documentElement.toggleAttribute("data-idle", idle);
+}
+
+window.addEventListener("blur", () => setIdle(true));
+window.addEventListener("focus", () => setIdle(false));
+document.addEventListener("visibilitychange", () => setIdle(document.hidden));
+setIdle(document.hidden);
 
 const embedFrame = document.getElementById("embedFrame");
 const embedFullscreenBtn = document.getElementById("embedFullscreenBtn");
