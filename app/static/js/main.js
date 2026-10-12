@@ -47,8 +47,13 @@ function getActiveTheme() {
 function updateThemeButton() {
   if (!themeToggle) return;
   const activeTheme = getActiveTheme();
-  themeToggle.querySelector(".theme-toggle-label").textContent =
-    activeTheme === "dark" ? "Light Mode" : "Dark Mode";
+  // Icon-only button: the icon shows the mode a click switches to, and the
+  // words live in the tooltip and accessible name
+  const label = activeTheme === "dark" ? "Switch to light mode" : "Switch to dark mode";
+  themeToggle.querySelector('[data-icon="sun"]').toggleAttribute("hidden", activeTheme !== "dark");
+  themeToggle.querySelector('[data-icon="moon"]').toggleAttribute("hidden", activeTheme === "dark");
+  themeToggle.setAttribute("aria-label", label);
+  themeToggle.title = label;
 }
 
 if (themeToggle) {
