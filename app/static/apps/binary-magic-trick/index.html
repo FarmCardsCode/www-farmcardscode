@@ -374,10 +374,10 @@
   <p class="subtitle">Think of a number between 1 and 31. Answer a few questions, and the computer will read your mind.</p>
 
   <div class="tabs" role="tablist">
-    <button class="tab active" data-panel="trick" role="tab">🎩 The Trick</button>
-    <button class="tab" data-panel="perform" role="tab">🃏 Perform It</button>
-    <button class="tab" data-panel="secret" role="tab">🔓 The Secret</button>
-    <button class="tab" data-panel="practice" role="tab">🧠 Practice</button>
+    <button class="tab active" data-panel="trick" role="tab">The Trick</button>
+    <button class="tab" data-panel="perform" role="tab">Perform It</button>
+    <button class="tab" data-panel="secret" role="tab">The Secret</button>
+    <button class="tab" data-panel="practice" role="tab">Practice</button>
   </div>
 
   <!-- THE TRICK: the computer is the magician -->
@@ -676,7 +676,7 @@
     if (!quizAnswered) attempted++;
     if (guess === quizTarget) {
       if (!quizAnswered) correct++;
-      quizFeedback.textContent = "Correct! You read their mind. 🎉";
+      quizFeedback.textContent = "Correct! You read their mind.";
       quizFeedback.className = "feedback good";
       // Reveal the answer on the cards
       quizCards.querySelectorAll(".num-card").forEach(card => {
