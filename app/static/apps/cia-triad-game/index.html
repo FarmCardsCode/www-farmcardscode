@@ -183,9 +183,13 @@
     text-align: left;
     padding: 10px;
   }
-  th.col-head .icon {
-    font-size: 1.3rem;
+  .icon {
+    display: inline-flex;
   }
+  th.col-head.confidentiality .icon { color: var(--confidentiality); }
+  th.col-head.integrity .icon { color: var(--integrity); }
+  th.col-head.availability .icon { color: var(--availability); }
+  th.row-head .icon { color: var(--muted); margin-bottom: 4px; }
   th.col-head .name {
     font-weight: 700;
     font-size: 0.95rem;
@@ -302,17 +306,17 @@
         <tr>
           <th class="corner"></th>
           <th class="col-head confidentiality">
-            <span class="icon">🔒</span>
+            <span class="icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
             <span class="name">Confidentiality</span>
             <span class="desc">Ensuring access to information is restricted only to users, processes, or devices that are authorized.</span>
           </th>
           <th class="col-head integrity">
-            <span class="icon">🔎</span>
+            <span class="icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span>
             <span class="name">Integrity</span>
             <span class="desc">Ensuring that information is a true and accurate representation of data; prevention of unauthorized modification or destruction.</span>
           </th>
           <th class="col-head availability">
-            <span class="icon">🪪</span>
+            <span class="icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span>
             <span class="name">Availability</span>
             <span class="desc">Ensuring reliable access to information by authorized users, processes, or devices.</span>
           </th>
@@ -334,9 +338,9 @@
 
 <script>
   const rows = [
-    { key: "storage", name: "Storage", desc: "Information is stored when it is at rest, usually on a device such as a hard drive, memory, CD/DVD, or thumb drive.", icon: "💾" },
-    { key: "transmission", name: "Transmission", desc: "Information is in transmission when it flows from one location to another, usually over a medium such as network cables, Wi-Fi, or audio waves.", icon: "📡" },
-    { key: "processing", name: "Processing", desc: "Manipulating data within the computer. This includes calculations by the CPU, spreadsheets, programs, and other devices.", icon: "🖥️" }
+    { key: "storage", name: "Storage", desc: "Information is stored when it is at rest, usually on a device such as a hard drive, memory, CD/DVD, or thumb drive.", icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg>' },
+    { key: "transmission", name: "Transmission", desc: "Information is in transmission when it flows from one location to another, usually over a medium such as network cables, Wi-Fi, or audio waves.", icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>' },
+    { key: "processing", name: "Processing", desc: "Manipulating data within the computer. This includes calculations by the CPU, spreadsheets, programs, and other devices.", icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M15 2v2M15 20v2M2 15h2M2 9h2M20 15h2M20 9h2M9 2v2M9 20v2"/></svg>' }
   ];
   const cols = ["confidentiality", "integrity", "availability"];
 
