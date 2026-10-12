@@ -1,0 +1,15 @@
+{
+  "slug": "binary-magic-trick",
+  "title": "Activity 4.1.1 - Binary Numbers Magic Trick",
+  "date": "2026-10-12",
+  "category": "In-Class Activity",
+  "summary": "Think of a number from 1 to 31, answer five yes-or-no questions, and watch the computer read your mind. Then learn how bits and binary make the trick work.",
+  "body": [
+    "Pick a secret number between 1 and 31. For each of five cards, say whether your number is on it, and the computer will guess your number.",
+    "Use Perform It to learn the trick and run it for your group, The Secret to see how binary place values make it work, and Practice to be the magician yourself."
+  ],
+  "type": "embed",
+  "url": "apps/binary-magic-trick/index.html",
+  "published": true,
+  "featured": true
+}

@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Activity 4.1.1 - Binary Numbers Magic Trick</title>
+<style>
+  :root {
+    --accent: #6b46c1;
+    --accent-soft: #efe9fb;
+    --bg: #f7f8fa;
+    --card-bg: #ffffff;
+    --border: #d5dae0;
+    --text: #1f2933;
+    --muted: #52606d;
+    --panel-bg: #eef1f4;
+    --hl-bg: #fff3c4;
+    --hl-border: #d69e2e;
+    --yes: #2f855a;
+    --yes-bg: #eafaf1;
+    --no: #c53030;
+    --no-bg: #fdeeee;
+    --bit-off: #e2e8f0;
+    --btn-secondary-bg: #e2e8f0;
+    --btn-secondary-bg-hover: #cbd5e0;
+    --shadow: rgba(0,0,0,0.06);
+    --shadow-hover: rgba(0,0,0,0.12);
+  }
+  [data-theme="dark"] {
+    --accent: #a98bf0;
+    --accent-soft: #2a2340;
+    --bg: #14181d;
+    --card-bg: #1f252c;
+    --border: #333c46;
+    --text: #e7ebef;
+    --muted: #9aa5b1;
+    --panel-bg: #1a1f26;
+    --hl-bg: #3d3214;
+    --hl-border: #e0ac4c;
+    --yes: #48bb78;
+    --yes-bg: #16281e;
+    --no: #e05353;
+    --no-bg: #2c1717;
+    --bit-off: #2b333d;
+    --btn-secondary-bg: #2b333d;
+    --btn-secondary-bg-hover: #38414d;
+    --shadow: rgba(0,0,0,0.3);
+    --shadow-hover: rgba(0,0,0,0.5);
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 20px;
+    padding-top: 64px;
+    transition: background 0.2s, color 0.2s;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; }
+  h1 { font-size: 1.6rem; margin-bottom: 4px; }
+  h2 { font-size: 1.2rem; margin: 0 0 10px 0; }
+  .subtitle {
+    color: var(--muted);
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+  }
+  #themeToggle {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 100;
+    background: var(--btn-secondary-bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 6px var(--shadow);
+  }
+  #themeToggle:hover { background: var(--btn-secondary-bg-hover); }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .tab {
+    background: none;
+    border: 1px solid transparent;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    padding: 10px 16px;
+    font: inherit;
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: var(--muted);
+    cursor: pointer;
+    margin-bottom: -1px;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active {
+    color: var(--text);
+    background: var(--card-bg);
+    border-color: var(--border);
+  }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .box {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 1px 2px var(--shadow);
+    margin-bottom: 20px;
+  }
+  .box p { line-height: 1.5; }
+  .box ol, .box ul { line-height: 1.55; padding-left: 22px; }
+  .box li { margin-bottom: 6px; }
+
+  /* Buttons */
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 16px;
+  }
+  button.btn {
+    border: none;
+    border-radius: 8px;
+    padding: 12px 22px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.05s;
+  }
+  button.btn:active { transform: translateY(1px); }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { filter: brightness(1.08); }
+  [data-theme="dark"] .btn-primary { color: #14181d; }
+  .btn-yes { background: var(--yes); color: #fff; min-width: 120px; }
+  .btn-no { background: var(--no); color: #fff; min-width: 120px; }
+  [data-theme="dark"] .btn-yes, [data-theme="dark"] .btn-no { color: #14181d; }
+  .btn-yes:hover, .btn-no:hover { filter: brightness(1.08); }
+  .btn-secondary {
+    background: var(--btn-secondary-bg);
+    color: var(--text);
+  }
+  .btn-secondary:hover { background: var(--btn-secondary-bg-hover); }
+
+  /* Number cards - laid out like the printed cards */
+  .num-card {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border: 2px solid var(--text);
+    border-radius: 4px;
+    background: var(--card-bg);
+    padding: 10px 6px;
+    gap: 4px;
+    font-variant-numeric: tabular-nums;
+    transition: border-color 0.15s, background 0.15s, opacity 0.15s;
+  }
+  .num-card span {
+    text-align: center;
+    padding: 6px 0;
+    border-radius: 4px;
+  }
+  .num-card.big {
+    max-width: 380px;
+    margin: 0 auto;
+    padding: 18px 10px;
+    gap: 8px;
+  }
+  .num-card.big span { font-size: 2rem; padding: 10px 0; }
+  .num-card.small span { font-size: 1rem; }
+  .num-card span.hl {
+    background: var(--hl-bg);
+    outline: 2px solid var(--hl-border);
+    font-weight: 700;
+  }
+  .num-card span.first {
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .num-card.dim { opacity: 0.35; }
+
+  .card-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 14px;
+  }
+  .card-slot { text-align: center; }
+  .card-slot .label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  /* Trick flow */
+  .stage { text-align: center; }
+  .stage p.prompt { font-size: 1.15rem; margin: 0 0 16px 0; }
+  .progress {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+  }
+  .reveal-number {
+    font-size: 5rem;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+    margin: 10px 0 6px 0;
+    animation: pop 0.5s ease-out;
+  }
+  @keyframes pop {
+    0% { transform: scale(0.3); opacity: 0; }
+    70% { transform: scale(1.15); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+  .card-flip { animation: slideIn 0.25s ease-out; }
+  @keyframes slideIn {
+    from { transform: translateX(30px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  .spoiler {
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+  }
+
+  /* Bits */
+  .bits {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 14px 0;
+  }
+  .bit {
+    width: 64px;
+    text-align: center;
+  }
+  .bit .val {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .bit .digit {
+    font-size: 2rem;
+    font-weight: 700;
+    border-radius: 8px;
+    padding: 8px 0;
+    background: var(--bit-off);
+    color: var(--muted);
+    transition: background 0.15s, color 0.15s;
+    font-family: "Courier New", Courier, monospace;
+  }
+  .bit.on .digit { background: var(--accent); color: #fff; }
+  [data-theme="dark"] .bit.on .digit { color: #14181d; }
+  button.bit-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+  .sum-line {
+    text-align: center;
+    font-size: 1.1rem;
+    margin: 6px 0 16px 0;
+    min-height: 1.6em;
+  }
+  .sum-line strong { color: var(--accent); }
+
+  .explore-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+  .explore-controls input[type="range"] { width: 240px; max-width: 60vw; }
+  .explore-controls .big-num {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--accent);
+    min-width: 2.2ch;
+    text-align: center;
+  }
+
+  /* Quiz */
+  .quiz-answer {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+  .quiz-answer input {
+    width: 110px;
+    font-size: 1.2rem;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    text-align: center;
+  }
+  .feedback {
+    text-align: center;
+    margin-top: 12px;
+    font-weight: 600;
+    min-height: 1.4em;
+  }
+  .feedback.good { color: var(--yes); }
+  .feedback.bad { color: var(--no); }
+  .score { text-align: center; color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
+
+  table.bin-table {
+    border-collapse: collapse;
+    margin: 10px auto;
+    font-variant-numeric: tabular-nums;
+  }
+  table.bin-table th, table.bin-table td {
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    text-align: center;
+  }
+  table.bin-table th { background: var(--panel-bg); font-size: 0.85rem; }
+  table.bin-table td.one { color: var(--accent); font-weight: 700; }
+
+  .source {
+    color: var(--muted);
+    font-size: 0.8rem;
+    text-align: center;
+    margin-top: 24px;
+  }
+  .source a { color: var(--muted); }
+
+  @media (max-width: 520px) {
+    .num-card.big span { font-size: 1.5rem; padding: 6px 0; }
+    .reveal-number { font-size: 4rem; }
+    .bit { width: 52px; }
+  }
+</style>
+</head>
+<body>
+
+<button id="themeToggle" aria-label="Toggle dark mode">
+  <span id="themeIcon">🌙</span>
+  <span id="themeLabel">Dark mode</span>
+</button>
+
+<div class="wrap">
+  <h1>Activity 4.1.1 - Binary Numbers Magic Trick</h1>
+  <p class="subtitle">Think of a number between 1 and 31. Answer a few questions, and the computer will read your mind.</p>
+
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-panel="trick" role="tab">🎩 The Trick</button>
+    <button class="tab" data-panel="perform" role="tab">🃏 Perform It</button>
+    <button class="tab" data-panel="secret" role="tab">🔓 The Secret</button>
+    <button class="tab" data-panel="practice" role="tab">🧠 Practice</button>
+  </div>
+
+  <!-- THE TRICK: the computer is the magician -->
+  <section class="panel active" id="panel-trick">
+    <div class="box stage" id="stage"></div>
+  </section>
+
+  <!-- PERFORM IT: the activity instructions + all five cards -->
+  <section class="panel" id="panel-perform">
+    <div class="box">
+      <h2>How to perform the trick</h2>
+      <ol>
+        <li>Ask someone to think of a number between <strong>1 and 31</strong>, and keep it a secret inside their head!</li>
+        <li>Show them each of the five cards below, one at a time. For each card, ask if their number is on it.</li>
+        <li>If they say <strong>yes</strong>, put the card in the "yes" pile. If they say <strong>no</strong>, put it in the "no" pile.</li>
+        <li>Add up the <strong>first number</strong> on each card in the "yes" pile. That's their number!</li>
+      </ol>
+      <p>For example, if the "yes" pile holds the cards that start with <strong>2</strong>, <strong>8</strong>, and <strong>4</strong>, their number is 2 + 8 + 4 = <strong>14</strong>.</p>
+      <p><strong>Don't tell anyone how you did it!</strong> In class, one student from each group learns the trick, then goes back and performs it for their group until someone figures out how it works.</p>
+    </div>
+    <div class="box">
+      <h2>The five cards</h2>
+      <div class="card-row" id="allCards"></div>
+    </div>
+  </section>
+
+  <!-- THE SECRET: binary explanation + explorer -->
+  <section class="panel" id="panel-secret">
+    <div class="spoiler" id="spoilerGate">
+      <strong>Spoiler warning!</strong> Try to figure out the trick on your own first.
+      <div class="btn-row" style="justify-content:flex-start">
+        <button class="btn btn-primary" id="showSecret">I'm ready - show me the secret</button>
+      </div>
+    </div>
+    <div id="secretContent" hidden>
+      <div class="box">
+        <h2>It's binary!</h2>
+        <p>Look at the first number on each card: <strong>16, 8, 4, 2, 1</strong>. Those are the place values of a 5-bit binary number. Every number from 1 to 31 can be written as a sum of some of those values, and there's only one way to do it.</p>
+        <p>Each card holds exactly the numbers that have a <strong>1</strong> in that card's place. So when someone says "yes" to a card, they're telling you that bit is a 1. A "no" means it's a 0. Add up the place values of the 1s and you've converted their secret binary number back to decimal.</p>
+        <table class="bin-table">
+          <tr><th>Card</th><th>16</th><th>8</th><th>4</th><th>2</th><th>1</th><th></th></tr>
+          <tr><th>Answer</th><td>no</td><td class="one">yes</td><td class="one">yes</td><td class="one">yes</td><td>no</td><td></td></tr>
+          <tr><th>Bit</th><td>0</td><td class="one">1</td><td class="one">1</td><td class="one">1</td><td>0</td><td>= 8 + 4 + 2 = <strong>14</strong></td></tr>
+        </table>
+      </div>
+
+      <div class="box">
+        <h2>Explore</h2>
+        <p>Pick a number, or click the bits to flip them. Watch which cards it appears on.</p>
+        <div class="explore-controls">
+          <label for="exploreRange">Number:</label>
+          <input type="range" id="exploreRange" min="1" max="31" value="14">
+          <span class="big-num" id="exploreNum">14</span>
+        </div>
+        <div class="bits" id="exploreBits"></div>
+        <div class="sum-line" id="exploreSum"></div>
+        <div class="card-row" id="exploreCards"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRACTICE: be the magician -->
+  <section class="panel" id="panel-practice">
+    <div class="box stage">
+      <h2>You're the magician</h2>
+      <p>Your audience said <strong>"yes"</strong> to these cards. What number were they thinking of?</p>
+      <div class="card-row" id="quizCards"></div>
+      <div class="quiz-answer">
+        <input type="number" id="quizInput" min="1" max="31" inputmode="numeric" aria-label="Your answer">
+        <button class="btn btn-primary" id="quizCheck">Check</button>
+        <button class="btn btn-secondary" id="quizNext">New round</button>
+      </div>
+      <div class="feedback" id="quizFeedback"></div>
+      <div class="score" id="quizScore"></div>
+    </div>
+  </section>
+
+  <p class="source">Adapted from CYBER.ORG Activity 4.1.1. Original trick: <a href="http://www.mathmaniacs.org/lessons/01-binary/Magic_Trick/" target="_blank" rel="noopener">mathmaniacs.org</a></p>
+</div>
+
+<script>
+  // ---------- Card data ----------
+  // Card for place value v holds every number 1-31 whose binary form has
+  // that bit set; its first number is v itself.
+  const PLACES = [16, 8, 4, 2, 1];
+  const CARDS = PLACES.map(v => {
+    const nums = [];
+    for (let n = 1; n <= 31; n++) if (n & v) nums.push(n);
+    return { value: v, nums };
+  });
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function renderCard(card, opts = {}) {
+    const el = document.createElement("div");
+    el.className = "num-card " + (opts.size || "small");
+    card.nums.forEach((n, i) => {
+      const s = document.createElement("span");
+      s.textContent = n;
+      if (opts.highlight === n) s.classList.add("hl");
+      if (opts.markFirst && i === 0) s.classList.add("first");
+      el.appendChild(s);
+    });
+    if (opts.dim) el.classList.add("dim");
+    return el;
+  }
+
+  // ---------- Tabs ----------
+  document.querySelectorAll(".tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t === tab));
+      document.querySelectorAll(".panel").forEach(p =>
+        p.classList.toggle("active", p.id === "panel-" + tab.dataset.panel));
+    });
+  });
+
+  // ---------- The Trick ----------
+  const stage = document.getElementById("stage");
+  let order = [];
+  let step = 0;
+  let yesCards = [];
+
+  function trickIntro() {
+    stage.innerHTML = `
+      <p class="prompt">Think of a whole number between <strong>1</strong> and <strong>31</strong>.<br>Keep it a secret inside your head!</p>
+      <p style="color:var(--muted)">I'll show you five cards. Just tell me if your number is on each one.</p>
+      <div class="btn-row"><button class="btn btn-primary" id="startTrick">I've got my number</button></div>`;
+    document.getElementById("startTrick").onclick = () => {
+      order = shuffle(CARDS);
+      step = 0;
+      yesCards = [];
+      trickStep();
+    };
+  }
+
+  function trickStep() {
+    if (step >= order.length) return trickReveal();
+    stage.innerHTML = `
+      <div class="progress">Card ${step + 1} of ${order.length}</div>
+      <p class="prompt">Is your number on this card?</p>`;
+    const card = renderCard(order[step], { size: "big" });
+    card.classList.add("card-flip");
+    stage.appendChild(card);
+    const row = document.createElement("div");
+    row.className = "btn-row";
+    row.innerHTML = `
+      <button class="btn btn-yes" id="ansYes">Yes</button>
+      <button class="btn btn-no" id="ansNo">No</button>`;
+    stage.appendChild(row);
+    document.getElementById("ansYes").onclick = () => answer(true);
+    document.getElementById("ansNo").onclick = () => answer(false);
+  }
+
+  function answer(yes) {
+    if (yes) yesCards.push(order[step]);
+    step++;
+    trickStep();
+  }
+
+  function trickReveal() {
+    const total = yesCards.reduce((sum, c) => sum + c.value, 0);
+    if (total === 0) {
+      stage.innerHTML = `
+        <p class="prompt">Hmm... your number wasn't on <em>any</em> card?</p>
+        <p style="color:var(--muted)">Every number from 1 to 31 is on at least one card. Did you pick a number in range?</p>
+        <div class="btn-row"><button class="btn btn-primary" id="again">Try again</button></div>`;
+    } else {
+      stage.innerHTML = `
+        <p class="prompt">Your number is...</p>
+        <div class="reveal-number">${total}</div>
+        <p style="color:var(--muted)">Spooky, right? Can you figure out how I did it?</p>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="again">Play again</button>
+          <button class="btn btn-secondary" id="howBtn">Show me the cards you picked</button>
+        </div>
+        <div id="pickedCards" style="margin-top:20px" hidden></div>`;
+      document.getElementById("howBtn").onclick = () => {
+        const wrap = document.getElementById("pickedCards");
+        wrap.hidden = false;
+        wrap.innerHTML = `<p style="color:var(--muted)">You said "yes" to these cards. Notice anything about them?</p>`;
+        const row = document.createElement("div");
+        row.className = "card-row";
+        yesCards.forEach(c => {
+          const slot = document.createElement("div");
+          slot.className = "card-slot";
+          slot.appendChild(renderCard(c, { highlight: total }));
+          row.appendChild(slot);
+        });
+        wrap.appendChild(row);
+        document.getElementById("howBtn").remove();
+      };
+    }
+    document.getElementById("again").onclick = trickIntro;
+  }
+
+  trickIntro();
+
+  // ---------- Perform It: all cards ----------
+  const allCards = document.getElementById("allCards");
+  CARDS.forEach(c => {
+    const slot = document.createElement("div");
+    slot.className = "card-slot";
+    slot.appendChild(renderCard(c));
+    allCards.appendChild(slot);
+  });
+
+  // ---------- The Secret ----------
+  document.getElementById("showSecret").onclick = () => {
+    document.getElementById("spoilerGate").hidden = true;
+    document.getElementById("secretContent").hidden = false;
+  };
+
+  const exploreRange = document.getElementById("exploreRange");
+  const exploreNum = document.getElementById("exploreNum");
+  const exploreBits = document.getElementById("exploreBits");
+  const exploreSum = document.getElementById("exploreSum");
+  const exploreCards = document.getElementById("exploreCards");
+
+  function setExplore(n) {
+    exploreRange.value = n;
+    exploreNum.textContent = n;
+
+    exploreBits.innerHTML = "";
+    PLACES.forEach(v => {
+      const b = document.createElement("button");
+      b.className = "bit bit-btn" + (n & v ? " on" : "");
+      b.setAttribute("aria-label", `Flip the ${v}s bit`);
+      b.innerHTML = `<div class="val">${v}</div><div class="digit">${n & v ? 1 : 0}</div>`;
+      b.onclick = () => {
+        const next = n ^ v;
+        if (next >= 1) setExplore(next);
+      };
+      exploreBits.appendChild(b);
+    });
+
+    const parts = PLACES.filter(v => n & v);
+    exploreSum.innerHTML = `Binary <strong>${n.toString(2).padStart(5, "0")}</strong> = ${parts.join(" + ")} = <strong>${n}</strong>`;
+
+    exploreCards.innerHTML = "";
+    CARDS.forEach(c => {
+      const on = Boolean(n & c.value);
+      const slot = document.createElement("div");
+      slot.className = "card-slot";
+      slot.appendChild(renderCard(c, { highlight: on ? n : null, dim: !on, markFirst: on }));
+      const label = document.createElement("div");
+      label.className = "label";
+      label.textContent = on ? `Yes - add ${c.value}` : "No";
+      slot.appendChild(label);
+      exploreCards.appendChild(slot);
+    });
+  }
+
+  exploreRange.addEventListener("input", () => setExplore(Number(exploreRange.value)));
+  setExplore(14);
+
+  // ---------- Practice ----------
+  const quizCards = document.getElementById("quizCards");
+  const quizInput = document.getElementById("quizInput");
+  const quizFeedback = document.getElementById("quizFeedback");
+  const quizScore = document.getElementById("quizScore");
+  let quizTarget = 0;
+  let quizAnswered = false;
+  let correct = 0;
+  let attempted = 0;
+
+  function newQuiz() {
+    let n;
+    do { n = 1 + Math.floor(Math.random() * 31); } while (n === quizTarget);
+    quizTarget = n;
+    quizAnswered = false;
+    quizInput.value = "";
+    quizFeedback.textContent = "";
+    quizFeedback.className = "feedback";
+    quizCards.innerHTML = "";
+    // Show the "yes" cards in a shuffled order so the place values aren't
+    // always sorted for the student
+    shuffle(CARDS.filter(c => n & c.value)).forEach(c => {
+      const slot = document.createElement("div");
+      slot.className = "card-slot";
+      slot.appendChild(renderCard(c));
+      quizCards.appendChild(slot);
+    });
+    quizInput.focus();
+  }
+
+  function checkQuiz() {
+    const guess = Number(quizInput.value);
+    if (!quizInput.value) return;
+    if (!quizAnswered) attempted++;
+    if (guess === quizTarget) {
+      if (!quizAnswered) correct++;
+      quizFeedback.textContent = "Correct! You read their mind. 🎉";
+      quizFeedback.className = "feedback good";
+      // Reveal the answer on the cards
+      quizCards.querySelectorAll(".num-card").forEach(card => {
+        card.querySelectorAll("span").forEach((s, i) => {
+          if (i === 0) s.classList.add("first");
+          if (Number(s.textContent) === quizTarget) s.classList.add("hl");
+        });
+      });
+    } else {
+      quizFeedback.textContent = "Not quite. Try adding up the first number on each card.";
+      quizFeedback.className = "feedback bad";
+    }
+    quizAnswered = true;
+    quizScore.textContent = `Score: ${correct} / ${attempted}`;
+  }
+
+  document.getElementById("quizCheck").onclick = checkQuiz;
+  document.getElementById("quizNext").onclick = newQuiz;
+  quizInput.addEventListener("keydown", e => { if (e.key === "Enter") checkQuiz(); });
+  newQuiz();
+
+  // ---------- Theme ----------
+  const themeToggle = document.getElementById("themeToggle");
+  const themeIcon = document.getElementById("themeIcon");
+  const themeLabel = document.getElementById("themeLabel");
+
+  function applyTheme(theme) {
+    if (theme === "dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+      themeIcon.textContent = "☀️";
+      themeLabel.textContent = "Light mode";
+    } else {
+      document.documentElement.removeAttribute("data-theme");
+      themeIcon.textContent = "🌙";
+      themeLabel.textContent = "Dark mode";
+    }
+  }
+
+  const darkMediaQuery = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+
+  function initTheme() {
+    let saved = null;
+    try { saved = localStorage.getItem("binary-trick-theme"); } catch (e) {}
+    if (saved) {
+      applyTheme(saved);
+    } else {
+      applyTheme(darkMediaQuery && darkMediaQuery.matches ? "dark" : "light");
+    }
+
+    // If the user hasn't manually chosen a theme, follow the OS setting live
+    if (darkMediaQuery) {
+      const handleSystemChange = (e) => {
+        let manualOverride = null;
+        try { manualOverride = localStorage.getItem("binary-trick-theme"); } catch (err) {}
+        if (!manualOverride) {
+          applyTheme(e.matches ? "dark" : "light");
+        }
+      };
+      if (darkMediaQuery.addEventListener) {
+        darkMediaQuery.addEventListener("change", handleSystemChange);
+      } else if (darkMediaQuery.addListener) {
+        darkMediaQuery.addListener(handleSystemChange);
+      }
+    }
+  }
+
+  themeToggle.addEventListener("click", () => {
+    const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    applyTheme(next);
+    try { localStorage.setItem("binary-trick-theme", next); } catch (e) {}
+  });
+
+  initTheme();
+</script>
+</body>
+</html>
