@@ -1,0 +1,15 @@
+{
+  "slug": "seven-steps-of-hacking",
+  "title": "Activity 2.1.1 - Seven Steps of Hacking",
+  "date": "2026-10-12",
+  "category": "In-Class Activity",
+  "summary": "Put the seven stages of an attack in order, from recon to covering tracks, against the clock.",
+  "body": [
+    "Sort the seven stages of a hack into the order they happen, from first contact to the final cover-up, then check your work.",
+    "Tap a card to pick it up and tap a slot to place it, or drag and drop. Tap the i on a card to read its full description. The timer starts with your first move."
+  ],
+  "type": "embed",
+  "url": "apps/seven-steps-of-hacking/index.html",
+  "published": true,
+  "featured": false
+}
