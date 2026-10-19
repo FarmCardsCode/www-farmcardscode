@@ -89,7 +89,8 @@ function setIdle(idle) {
 document.addEventListener("visibilitychange", () => setIdle(document.hidden));
 setIdle(document.hidden);
 
-// Cinematic glitch: every few seconds (at random) the terminal shell tears
+// Cinematic glitch: every page load opens with a full burst, then every
+// so often (at random) the terminal shell tears
 // for a handful of frames through the #cinematic-glitch filter in
 // base.html. Each burst picks a character (a mix of styles below) and a
 // length, and every frame rerolls the filter's seed, band size, tear
@@ -164,16 +165,17 @@ if (glitchShell && glitchFilter) {
     scheduleGlitch();
   }
 
-  function playBurst() {
+  function playBurst(opening = false) {
     if (document.hidden || reducedMotion.matches) {
       scheduleGlitch();
       return;
     }
 
     // A burst's character is one to three styles it cuts between; about a
-    // quarter of bursts are a single-frame blip, the rest run 2-7 frames
-    const mix = Array.from({ length: randInt(1, 3) }, () => pick(styleNames));
-    let framesLeft = Math.random() < 0.25 ? 1 : randInt(2, 7);
+    // quarter of bursts are a single-frame blip, the rest run 2-7 frames.
+    // The opening burst is never a blip and always runs long.
+    const mix = Array.from({ length: randInt(opening ? 2 : 1, 3) }, () => pick(styleNames));
+    let framesLeft = opening ? randInt(5, 9) : Math.random() < 0.25 ? 1 : randInt(2, 7);
 
     root.setAttribute("data-cinematic-glitch", "");
     root.style.setProperty("--cinematic-glitch-static", rand(3, 6).toFixed(1));
@@ -189,8 +191,20 @@ if (glitchShell && glitchFilter) {
   }
 
   function scheduleGlitch() {
-    setTimeout(playBurst, rand(3500, 8500));
+    setTimeout(playBurst, rand(2000, 14000));
   }
 
-  scheduleGlitch();
+  // Guaranteed opening burst just after the first paint. A page opened in
+  // a background tab saves it for the moment the tab is first shown.
+  function playOpeningBurst() {
+    setTimeout(() => playBurst(true), rand(150, 400));
+  }
+
+  if (reducedMotion.matches) {
+    scheduleGlitch();
+  } else if (document.hidden) {
+    document.addEventListener("visibilitychange", playOpeningBurst, { once: true });
+  } else {
+    playOpeningBurst();
+  }
 }
