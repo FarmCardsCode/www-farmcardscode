@@ -64,7 +64,7 @@
   --scanline-pattern-color: rgba(0, 0, 0, 0.12);
   --scanline-pattern-size: 3px;
   --scanline-sweep-duration: 7s;
-  --scanline-pattern-duration: 0.75s;
+  --scanline-pattern-duration: 1.2s;
 
   /* CRT phosphor tuning: bloom halo around text, the RGB aperture grille,
      brightness flicker depth, and the curved-glass edge falloff */
@@ -74,9 +74,6 @@
   --flicker-color: rgba(0, 0, 0, 0.022);
   --glass-edge: rgba(0, 0, 0, 0.55);
   --glass-shine: rgba(255, 255, 255, 0.025);
-
-  /* One glitch cycle: three bursts (stutter, big tear, blip) per cycle */
-  --glitch-cycle: 9s;
 }
 
 /* --------------------------------------------------------------------------
@@ -175,7 +172,7 @@ body {
    - .scanlines: raster line structure plus the rolling refresh band
    - .flicker: tiny, irregular brightness dips
    - .crt-glass: RGB aperture grille, vignette, and curved-glass edges
-   Bloom and the signal glitch act on the content itself (see
+   Bloom and the cinematic glitch act on the content itself (see
    .terminal-shell); the glitch also spikes the static (.noise).
    Only base.html includes these layers, so the embedded apps are untouched.
    ========================================================================== */
@@ -211,17 +208,13 @@ body {
   background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/><feColorMatrix type='matrix' values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   mix-blend-mode: soft-light;
   will-change: transform;
-  animation:
-    static-jitter 0.5s steps(1) infinite,
-    glitch-static var(--glitch-cycle) steps(1) infinite;
+  animation: static-jitter 0.5s steps(1) infinite;
 }
 
-/* Static spikes in step with the .terminal-shell glitch bursts (same cycle
-   length and keyframe percentages, so they stay locked together) */
-@keyframes glitch-static {
-  0%, 32.2%, 64.4%, 88.6% { opacity: var(--noise-opacity); }
-  31%, 62%, 88%           { opacity: calc(var(--noise-opacity) * 4); }
-  63%                     { opacity: calc(var(--noise-opacity) * 6); }
+/* Static spikes during cinematic glitch bursts; main.js sets
+   html[data-cinematic-glitch] and rerolls --cinematic-glitch-static each burst */
+html[data-cinematic-glitch] .noise {
+  opacity: calc(var(--noise-opacity) * var(--cinematic-glitch-static, 4));
 }
 
 @keyframes static-jitter {
@@ -245,7 +238,6 @@ html[data-idle] .noise,
 html[data-idle] .scanlines::before,
 html[data-idle] .scanlines::after,
 html[data-idle] .flicker,
-html[data-idle] .terminal-shell,
 html[data-idle] .typewriter::after {
   animation-play-state: paused;
 }
@@ -296,11 +288,12 @@ html[data-idle] .typewriter::after {
 /* --------------------------------------------------------------------------
    Raster scanlines.
    Fine dark rows between the "beam" lines give the persistent CRT line
-   structure across the full screen; the slow crawl moves exactly one row
-   pitch per cycle so the loop is seamless.
+   structure across the full screen. The layer extends one row pitch above
+   the viewport and glides down by exactly one pitch per cycle with a
+   compositor transform, so the crawl is smooth and the loop is seamless.
    -------------------------------------------------------------------------- */
 .scanlines::after {
-  inset: 0;
+  inset: calc(-1 * var(--scanline-pattern-size)) 0 0 0;
   background: linear-gradient(
     to bottom,
     transparent 0%,
@@ -310,7 +303,8 @@ html[data-idle] .typewriter::after {
   );
   background-size: 100% var(--scanline-pattern-size);
   opacity: var(--scanline-pattern-opacity);
-  animation: scanline-texture var(--scanline-pattern-duration) steps(3) infinite;
+  will-change: transform;
+  animation: scanline-texture var(--scanline-pattern-duration) linear infinite;
 }
 
 /* --------------------------------------------------------------------------
@@ -405,56 +399,13 @@ html[data-idle] .typewriter::after {
     0 0 1px var(--bloom-core),
     0 0 9px var(--bloom-halo);
 
-  /* Signal glitch: a few times per cycle the picture tears into sideways-
-     shifted slices with the red and cyan channels pulled apart (the SVG
-     filters in base.html), sometimes with a hard sideways slip or a bright
-     flash. Bursts last a tenth to a fifth of a second and cut between
-     filters every frame or two so no two glitch frames look alike. Outside
-     a burst the filter is none, so the cost only lands during a burst. */
-  animation: crt-glitch var(--glitch-cycle) steps(1) infinite;
+  /* The cinematic glitch (main.js) briefly sets filter and transform
+     here; between bursts both stay unset, so the tear costs nothing. */
 }
 
-@keyframes crt-glitch {
-  0%, 32.2%, 64.4%, 88.6% {
-    filter: none;
-    transform: none;
-  }
-  /* short stutter */
-  31% {
-    filter: url(#glitch-a);
-    transform: none;
-  }
-  31.6% {
-    filter: url(#glitch-b);
-    transform: translate3d(-6px, 0, 0);
-  }
-  /* the big one */
-  62% {
-    filter: url(#glitch-b);
-    transform: translate3d(10px, 0, 0);
-  }
-  62.5% {
-    filter: url(#glitch-c) brightness(1.35);
-    transform: none;
-  }
-  63% {
-    filter: url(#glitch-a);
-    transform: translate3d(-4px, -2px, 0);
-  }
-  63.6% {
-    filter: url(#glitch-c);
-    transform: translate3d(3px, 0, 0);
-  }
-  /* single-frame blip */
-  88% {
-    filter: url(#glitch-c);
-    transform: none;
-  }
-}
-
-/* The filter definitions in base.html must stay rendered (not display:none)
-   for url(#...) references to resolve, so they're just taken out of flow */
-.glitch-defs {
+/* The glitch filter in base.html must stay rendered (not display:none) for
+   url(#...) references to resolve, so it's just taken out of flow */
+.cinematic-glitch-defs {
   position: absolute;
   width: 0;
   height: 0;
@@ -934,7 +885,6 @@ html[data-idle] .typewriter::after {
   .scanlines::after,
   .noise,
   .flicker,
-  .terminal-shell,
   .typewriter::after {
     animation: none;
   }
@@ -1008,10 +958,10 @@ html[data-idle] .typewriter::after {
 /* Raster rows crawling down by exactly one row pitch per cycle */
 @keyframes scanline-texture {
   0% {
-    background-position: 0 0;
+    transform: translate3d(0, 0, 0);
   }
   100% {
-    background-position: 0 var(--scanline-pattern-size);
+    transform: translate3d(0, var(--scanline-pattern-size), 0);
   }
 }
 
