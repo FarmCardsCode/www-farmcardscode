@@ -67,16 +67,16 @@
   --scanline-pattern-duration: 0.75s;
 
   /* CRT phosphor tuning: bloom halo around text, the RGB aperture grille,
-     brightness flicker depth, chromatic-aberration glitch colors, and the
-     curved-glass edge falloff */
+     brightness flicker depth, and the curved-glass edge falloff */
   --bloom-core: rgba(255, 255, 255, 0.16);
   --bloom-halo: rgba(255, 49, 92, 0.2);
   --raster-opacity: 0.03;
   --flicker-color: rgba(0, 0, 0, 0.022);
-  --aberration-red: rgba(255, 30, 70, 0.55);
-  --aberration-cyan: rgba(0, 220, 255, 0.5);
   --glass-edge: rgba(0, 0, 0, 0.55);
   --glass-shine: rgba(255, 255, 255, 0.025);
+
+  /* One glitch cycle: three bursts (stutter, big tear, blip) per cycle */
+  --glitch-cycle: 9s;
 }
 
 /* --------------------------------------------------------------------------
@@ -133,8 +133,6 @@ html[data-theme="light"] {
   --bloom-halo: rgba(193, 18, 58, 0.08);
   --raster-opacity: 0.015;
   --flicker-color: rgba(0, 0, 0, 0.012);
-  --aberration-red: rgba(220, 0, 50, 0.35);
-  --aberration-cyan: rgba(0, 160, 210, 0.35);
   --glass-edge: rgba(25, 30, 40, 0.16);
   --glass-shine: rgba(255, 255, 255, 0.12);
 }
@@ -177,8 +175,8 @@ body {
    - .scanlines: raster line structure plus the rolling refresh band
    - .flicker: tiny, irregular brightness dips
    - .crt-glass: RGB aperture grille, vignette, and curved-glass edges
-   Bloom and the chromatic-aberration glitch act on the content itself
-   (see .terminal-shell).
+   Bloom and the signal glitch act on the content itself (see
+   .terminal-shell); the glitch also spikes the static (.noise).
    Only base.html includes these layers, so the embedded apps are untouched.
    ========================================================================== */
 
@@ -213,7 +211,17 @@ body {
   background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/><feColorMatrix type='matrix' values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   mix-blend-mode: soft-light;
   will-change: transform;
-  animation: static-jitter 0.5s steps(1) infinite;
+  animation:
+    static-jitter 0.5s steps(1) infinite,
+    glitch-static var(--glitch-cycle) steps(1) infinite;
+}
+
+/* Static spikes in step with the .terminal-shell glitch bursts (same cycle
+   length and keyframe percentages, so they stay locked together) */
+@keyframes glitch-static {
+  0%, 32.2%, 64.4%, 88.6% { opacity: var(--noise-opacity); }
+  31%, 62%, 88%           { opacity: calc(var(--noise-opacity) * 4); }
+  63%                     { opacity: calc(var(--noise-opacity) * 6); }
 }
 
 @keyframes static-jitter {
@@ -397,43 +405,60 @@ html[data-idle] .typewriter::after {
     0 0 1px var(--bloom-core),
     0 0 9px var(--bloom-halo);
 
-  /* Chromatic-aberration glitch: every so often the red and cyan channels
-     split sideways off each glyph for a split second, as if the beam
-     convergence slipped. steps(1) means text only repaints at the handful
-     of keyframes where the split starts or stops, not every frame. */
-  animation: crt-aberration 9s steps(1) infinite;
+  /* Signal glitch: a few times per cycle the picture tears into sideways-
+     shifted slices with the red and cyan channels pulled apart (the SVG
+     filters in base.html), sometimes with a hard sideways slip or a bright
+     flash. Bursts last a tenth to a fifth of a second and cut between
+     filters every frame or two so no two glitch frames look alike. Outside
+     a burst the filter is none, so the cost only lands during a burst. */
+  animation: crt-glitch var(--glitch-cycle) steps(1) infinite;
 }
 
-@keyframes crt-aberration {
-  0%, 31.6%, 62.8%, 88.4% {
-    text-shadow:
-      0 0 1px var(--bloom-core),
-      0 0 9px var(--bloom-halo);
+@keyframes crt-glitch {
+  0%, 32.2%, 64.4%, 88.6% {
+    filter: none;
+    transform: none;
   }
+  /* short stutter */
   31% {
-    text-shadow:
-      -1px 0 0 var(--aberration-red),
-      1px 0 0 var(--aberration-cyan),
-      0 0 9px var(--bloom-halo);
+    filter: url(#glitch-a);
+    transform: none;
   }
+  31.6% {
+    filter: url(#glitch-b);
+    transform: translate3d(-6px, 0, 0);
+  }
+  /* the big one */
   62% {
-    text-shadow:
-      -2px 0 0 var(--aberration-red),
-      2px 0 0 var(--aberration-cyan),
-      0 0 9px var(--bloom-halo);
+    filter: url(#glitch-b);
+    transform: translate3d(10px, 0, 0);
   }
-  62.4% {
-    text-shadow:
-      1px 0 0 var(--aberration-red),
-      -1px 0 0 var(--aberration-cyan),
-      0 0 9px var(--bloom-halo);
+  62.5% {
+    filter: url(#glitch-c) brightness(1.35);
+    transform: none;
   }
+  63% {
+    filter: url(#glitch-a);
+    transform: translate3d(-4px, -2px, 0);
+  }
+  63.6% {
+    filter: url(#glitch-c);
+    transform: translate3d(3px, 0, 0);
+  }
+  /* single-frame blip */
   88% {
-    text-shadow:
-      -1px 0 0 var(--aberration-red),
-      1px 0 0 var(--aberration-cyan),
-      0 0 9px var(--bloom-halo);
+    filter: url(#glitch-c);
+    transform: none;
   }
+}
+
+/* The filter definitions in base.html must stay rendered (not display:none)
+   for url(#...) references to resolve, so they're just taken out of flow */
+.glitch-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
 }
 
 /* --------------------------------------------------------------------------
@@ -893,8 +918,6 @@ html[data-idle] .typewriter::after {
     --bloom-halo: rgba(193, 18, 58, 0.08);
     --raster-opacity: 0.015;
     --flicker-color: rgba(0, 0, 0, 0.012);
-    --aberration-red: rgba(220, 0, 50, 0.35);
-    --aberration-cyan: rgba(0, 160, 210, 0.35);
     --glass-edge: rgba(25, 30, 40, 0.16);
     --glass-shine: rgba(255, 255, 255, 0.12);
   }

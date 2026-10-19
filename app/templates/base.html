@@ -13,6 +13,35 @@
   <div class="flicker"></div>
   <div class="crt-glass"></div>
 
+  {#- Signal-glitch filters, switched on briefly by the crt-glitch animation
+      in style.css. Each one tears the page into horizontal slices (noise
+      that only varies vertically, quantized into a few discrete offsets,
+      drives a sideways displacement) and then pulls the red channel apart
+      from green/blue. Different seeds, band sizes, and strengths per filter
+      so consecutive glitch frames never repeat the same tear. -#}
+  <svg class="glitch-defs" width="0" height="0" aria-hidden="true" focusable="false">
+    {% for name, seed, bands, table, tear, split in [
+      ("a", 3, 0.012, "0.5 0.5 0.5 0.22 0.5 0.5 0.7 0.5 0.5", 70, 4),
+      ("b", 11, 0.03, "0.5 0.85 0.5 0.5 0.4 0.5 0.1 0.5 0.5 0.62", 50, 7),
+      ("c", 27, 0.007, "0.5 0.5 0.3 0.5 0.5 0.5 0.9 0.5", 110, 3),
+    ] %}
+    <filter id="glitch-{{ name }}" x="-10%" y="0" width="120%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0 {{ bands }}" numOctaves="1" seed="{{ seed }}" result="noise"/>
+      <feComponentTransfer in="noise" result="bands">
+        <feFuncR type="discrete" tableValues="{{ table }}"/>
+        <feFuncG type="discrete" tableValues="0.5"/>
+        <feFuncA type="discrete" tableValues="1"/>
+      </feComponentTransfer>
+      <feDisplacementMap in="SourceGraphic" in2="bands" scale="{{ tear }}" xChannelSelector="R" yChannelSelector="G" result="torn"/>
+      <feColorMatrix in="torn" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="red"/>
+      <feOffset in="red" dx="-{{ split }}" result="red-shifted"/>
+      <feColorMatrix in="torn" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0" result="cyan"/>
+      <feOffset in="cyan" dx="{{ split }}" result="cyan-shifted"/>
+      <feBlend in="red-shifted" in2="cyan-shifted" mode="screen"/>
+    </filter>
+    {% endfor %}
+  </svg>
+
   <main class="terminal-shell">
     <div class="terminal-bar">
       <div class="terminal-left">

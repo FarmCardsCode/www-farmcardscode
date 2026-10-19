@@ -77,11 +77,11 @@ window
 
 updateThemeButton();
 
-// The CRT overlays (scanline sweep, noise, flicker) and the shell's
-// aberration glitch run continuously across the whole viewport. They keep playing while the
-// window is merely unfocused (still visible beside another window), but pause
-// via html[data-idle] (see style.css) while the tab is hidden, and resume
-// exactly where they left off.
+// The CRT overlays (scanline sweep, noise, flicker) and the shell's signal
+// glitch run continuously across the whole viewport. They keep playing while
+// the window is merely unfocused (still visible beside another window), but
+// pause via html[data-idle] (see style.css) while the tab is hidden, and
+// resume exactly where they left off.
 function setIdle(idle) {
   document.documentElement.toggleAttribute("data-idle", idle);
 }
