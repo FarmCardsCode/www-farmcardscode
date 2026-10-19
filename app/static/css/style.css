@@ -52,17 +52,28 @@
   --shadow-red: rgba(255, 49, 92, 0.14);
 
   /* Overlay tuning */
-  --noise-opacity: 0.028;
-  --vignette-opacity: 0.18;
+  --noise-opacity: 0.06;
+  --vignette-opacity: 0.32;
 
   /* CRT scanline overlay tuning */
-  --scanline-sweep-opacity: 0.68;
-  --scanline-pattern-opacity: 0.30;
-  --scanline-sweep-color: rgba(155, 155, 155, 0.22);
-  --scanline-pattern-color: rgba(155, 155, 155, 0.14);
-  --scanline-pattern-size: 10px;
-  --scanline-sweep-duration: 5.5s;
+  --scanline-sweep-opacity: 0.7;
+  --scanline-pattern-opacity: 1;
+  --scanline-sweep-color: rgba(185, 185, 195, 0.07);
+  --scanline-sweep-edge: rgba(215, 215, 225, 0.2);
+  --scanline-sweep-height: clamp(70px, 14vh, 160px);
+  --scanline-pattern-color: rgba(0, 0, 0, 0.2);
+  --scanline-pattern-size: 3px;
+  --scanline-sweep-duration: 7s;
   --scanline-pattern-duration: 0.75s;
+
+  /* CRT phosphor tuning: bloom halo around text, the RGB aperture grille,
+     brightness flicker depth, and the curved-glass edge falloff */
+  --bloom-core: rgba(255, 255, 255, 0.16);
+  --bloom-halo: rgba(255, 49, 92, 0.2);
+  --raster-opacity: 0.07;
+  --flicker-color: rgba(0, 0, 0, 0.05);
+  --glass-edge: rgba(0, 0, 0, 0.55);
+  --glass-shine: rgba(255, 255, 255, 0.025);
 }
 
 /* --------------------------------------------------------------------------
@@ -106,13 +117,21 @@ html[data-theme="light"] {
   --shadow-red: rgba(193, 18, 58, 0.08);
 
   /* Overlays are intentionally much softer in light mode */
-  --noise-opacity: 0.006;
-  --vignette-opacity: 0.05;
+  --noise-opacity: 0.025;
+  --vignette-opacity: 0.08;
 
-  --scanline-sweep-opacity: 0.28;
-  --scanline-pattern-opacity: 0.18;
-  --scanline-sweep-color: rgba(0, 0, 0, 0.16);
-  --scanline-pattern-color: rgba(0, 0, 0, 0.12);
+  --scanline-sweep-opacity: 0.5;
+  --scanline-pattern-opacity: 1;
+  --scanline-sweep-color: rgba(0, 0, 0, 0.025);
+  --scanline-sweep-edge: rgba(0, 0, 0, 0.07);
+  --scanline-pattern-color: rgba(0, 0, 0, 0.05);
+
+  --bloom-core: rgba(255, 255, 255, 0);
+  --bloom-halo: rgba(193, 18, 58, 0.08);
+  --raster-opacity: 0.035;
+  --flicker-color: rgba(0, 0, 0, 0.025);
+  --glass-edge: rgba(25, 30, 40, 0.16);
+  --glass-shine: rgba(255, 255, 255, 0.12);
 }
 
 /* ==========================================================================
@@ -147,19 +166,28 @@ body {
 /* ==========================================================================
    OVERLAY LAYERS
    --------------------------------------------------------------------------
-   The site uses two fixed overlay elements in the background:
-   - .noise: very subtle static grain for texture
-   - .scanlines: CRT scanline pattern and sweep line using pseudo-elements
+   The CRT look is built from fixed, click-through layers stacked above the
+   page content (base.html), bottom to top:
+   - .noise: crawling static grain
+   - .scanlines: raster line structure plus the rolling refresh band
+   - .flicker: tiny, irregular brightness dips
+   - .crt-glass: RGB aperture grille, vignette, and curved-glass edges
+   Bloom and jitter act on the content itself (see .terminal-shell).
+   Only base.html includes these layers, so the embedded apps are untouched.
    ========================================================================== */
 
 .noise,
-.scanlines {
+.scanlines,
+.flicker,
+.crt-glass {
   pointer-events: none;
   position: fixed;
-  z-index: 0;
+  z-index: 10;
 }
 
-.scanlines {
+.scanlines,
+.flicker,
+.crt-glass {
   inset: 0;
 }
 
@@ -170,7 +198,7 @@ body {
    and a steps() animation jitters the layer's position a few times a second
    so the grain reads as crawling static rather than a fixed texture. Sized
    larger than the viewport (inset: -100px) so the jitter never drags an edge
-   into view. Paused when the tab is hidden/unfocused (see main.js) since
+   into view. Paused when the tab is hidden (see main.js) since
    this is a full-viewport composite every frame it runs.
    -------------------------------------------------------------------------- */
 .noise {
@@ -196,12 +224,14 @@ body {
   100% { transform: translate3d(0, 0, 0); }
 }
 
-/* Paused while the tab is hidden/unfocused, toggled by main.js. Every frame
-   of the noise jitter or the scanline sweep is a full-viewport composite, so
-   this is the single biggest lever the site has over background CPU use. */
+/* Paused while the tab is hidden, toggled by main.js. Every frame
+   of these overlay animations is a full-viewport composite, so this is the
+   single biggest lever the site has over background CPU use. */
 html[data-idle] .noise,
 html[data-idle] .scanlines::before,
 html[data-idle] .scanlines::after,
+html[data-idle] .flicker,
+html[data-idle] .terminal-shell,
 html[data-idle] .typewriter::after {
   animation-play-state: paused;
 }
@@ -225,62 +255,112 @@ html[data-idle] .typewriter::after {
 }
 
 /* --------------------------------------------------------------------------
-   Moving sweep line.
-   This travels vertically down the viewport and gives the screen a classic
-   analog refresh-pass feel.
+   Rolling refresh band.
+   A soft band of brightness with a crisp leading edge rolls down the screen,
+   like the beam pass of an analog set. Its height scales with the viewport
+   (clamped) so it reads the same on a phone and on a projector, and the
+   sweep starts and ends one band-height off-screen so it never pops in.
    -------------------------------------------------------------------------- */
 .scanlines::before {
   top: 0;
   left: 0;
   width: 100%;
-  height: 6px;
+  height: var(--scanline-sweep-height);
   background: linear-gradient(
     to bottom,
-    rgba(155, 155, 155, 0.04),
-    var(--scanline-sweep-color),
-    rgba(155, 155, 155, 0.02)
+    transparent 0%,
+    var(--scanline-sweep-color) 75%,
+    var(--scanline-sweep-color) calc(100% - 2px),
+    var(--scanline-sweep-edge) calc(100% - 2px),
+    var(--scanline-sweep-edge) 100%
   );
   opacity: var(--scanline-sweep-opacity);
+  will-change: transform;
   animation: scanline-sweep var(--scanline-sweep-duration) linear infinite;
 }
 
 /* --------------------------------------------------------------------------
-   Repeating horizontal scanline pattern.
-   This creates the persistent CRT line structure across the full screen.
+   Raster scanlines.
+   Fine dark rows between the "beam" lines give the persistent CRT line
+   structure across the full screen; the slow crawl moves exactly one row
+   pitch per cycle so the loop is seamless.
    -------------------------------------------------------------------------- */
 .scanlines::after {
   inset: 0;
   background: linear-gradient(
     to bottom,
-    trasparent 0%,
-    transparent 30%,
-    var(--scanline-pattern-color) 30%,
-    var(--scanline-pattern-color) 70%,
-    transparent 70%,
-    transparent 100%
+    transparent 0%,
+    transparent 50%,
+    var(--scanline-pattern-color) 50%,
+    var(--scanline-pattern-color) 100%
   );
   background-size: 100% var(--scanline-pattern-size);
   opacity: var(--scanline-pattern-opacity);
-  animation: scanline-texture var(--scanline-pattern-duration) steps(60) infinite;
+  animation: scanline-texture var(--scanline-pattern-duration) steps(3) infinite;
 }
 
 /* --------------------------------------------------------------------------
-   Soft screen vignette.
-   This slightly darkens the outer edges so the page reads more like a display
-   surface and less like a flat browser canvas.
+   Phosphor flicker.
+   A faint dark wash whose opacity wobbles irregularly, so overall screen
+   brightness dips by a percent or two at uneven intervals. Opacity is the
+   only animated property, which keeps this on the compositor.
    -------------------------------------------------------------------------- */
-body::before {
-  content: "";
-  pointer-events: none;
-  position: fixed;
-  inset: 0;
-  z-index: 0;
+.flicker {
+  background: var(--flicker-color);
+  opacity: 0;
+  will-change: opacity;
+  animation: crt-flicker 4.3s steps(1) infinite;
+}
+
+@keyframes crt-flicker {
+  0%   { opacity: 0.2; }
+  4%   { opacity: 0.6; }
+  8%   { opacity: 0.1; }
+  15%  { opacity: 0.4; }
+  22%  { opacity: 0; }
+  31%  { opacity: 0.5; }
+  33%  { opacity: 1; }
+  35%  { opacity: 0.3; }
+  47%  { opacity: 0.1; }
+  58%  { opacity: 0.6; }
+  64%  { opacity: 0.2; }
+  71%  { opacity: 0.8; }
+  73%  { opacity: 0.1; }
+  86%  { opacity: 0.4; }
+  93%  { opacity: 0; }
+}
+
+/* --------------------------------------------------------------------------
+   Curved glass.
+   Stacks the RGB aperture grille (vertical red/green/blue phosphor stripes,
+   the "rasterized" texture of a real tube), a soft specular highlight, and a
+   radial vignette. The rounded box plus its inset and outer shadows darkens
+   the corners and edges the way a slightly convex screen falls off, without
+   warping the content itself, so text stays crisp and clicks land where
+   they look like they should.
+   -------------------------------------------------------------------------- */
+.crt-glass {
+  border-radius: 3vmin / 4vmin;
   background:
     radial-gradient(
+      ellipse 70% 55% at 28% 18%,
+      var(--glass-shine),
+      transparent 70%
+    ),
+    radial-gradient(
       ellipse at center,
-      transparent 55%,
+      transparent 58%,
       rgba(0, 0, 0, var(--vignette-opacity)) 100%
+    ),
+    repeating-linear-gradient(
+      to right,
+      rgba(255, 0, 60, var(--raster-opacity)) 0 1px,
+      rgba(0, 255, 90, var(--raster-opacity)) 1px 2px,
+      rgba(40, 90, 255, var(--raster-opacity)) 2px 3px
     );
+  box-shadow:
+    inset 0 0 6vmin 1vmin var(--glass-edge),
+    0 0 1.5vmin 3vmin var(--glass-edge);
 }
 
 /* ==========================================================================
@@ -304,6 +384,28 @@ body::before {
     0 24px 60px var(--shadow),
     0 0 24px var(--shadow-red);
   overflow: hidden;
+
+  /* Phosphor bloom: a tight bright core plus a wider red halo on all text,
+     so glyphs look like they're glowing off the tube rather than printed */
+  text-shadow:
+    0 0 1px var(--bloom-core),
+    0 0 9px var(--bloom-halo);
+
+  /* Horizontal sync jitter: the picture holds still almost all the time,
+     then slips a pixel or two for a frame or so. Whole-pixel offsets only,
+     so text never lands on a half pixel and blurs. */
+  animation: crt-jitter 9s steps(1) infinite;
+}
+
+@keyframes crt-jitter {
+  0%     { transform: translate3d(0, 0, 0); }
+  31%    { transform: translate3d(1px, 0, 0); }
+  31.4%  { transform: translate3d(0, 0, 0); }
+  62%    { transform: translate3d(-2px, 0, 0); }
+  62.3%  { transform: translate3d(1px, 0, 0); }
+  62.7%  { transform: translate3d(0, 0, 0); }
+  88%    { transform: translate3d(0, 1px, 0); }
+  88.3%  { transform: translate3d(0, 0, 0); }
 }
 
 /* --------------------------------------------------------------------------
@@ -390,7 +492,9 @@ body::before {
   font-size: clamp(2rem, 5vw, 4rem);
   line-height: 1.05;
   text-transform: uppercase;
-  text-shadow: 0 0 10px rgba(255, 49, 92, 0.16);
+  text-shadow:
+    0 0 1px var(--bloom-core),
+    0 0 14px var(--bloom-halo);
 }
 
 /* Blinking cursor after typewriter hero titles, as a CSS pseudo-element
@@ -751,13 +855,21 @@ body::before {
     --shadow: rgba(25, 30, 40, 0.12);
     --shadow-red: rgba(193, 18, 58, 0.08);
 
-    --noise-opacity: 0.006;
-    --vignette-opacity: 0.05;
+    --noise-opacity: 0.025;
+    --vignette-opacity: 0.08;
 
-    --scanline-sweep-opacity: 0.18;
-    --scanline-pattern-opacity: 0.10;
-    --scanline-sweep-color: rgba(0, 0, 0, 0.10);
-    --scanline-pattern-color: rgba(0, 0, 0, 0.08);
+    --scanline-sweep-opacity: 0.5;
+    --scanline-pattern-opacity: 1;
+    --scanline-sweep-color: rgba(0, 0, 0, 0.025);
+    --scanline-sweep-edge: rgba(0, 0, 0, 0.07);
+    --scanline-pattern-color: rgba(0, 0, 0, 0.05);
+
+    --bloom-core: rgba(255, 255, 255, 0);
+    --bloom-halo: rgba(193, 18, 58, 0.08);
+    --raster-opacity: 0.035;
+    --flicker-color: rgba(0, 0, 0, 0.025);
+    --glass-edge: rgba(25, 30, 40, 0.16);
+    --glass-shine: rgba(255, 255, 255, 0.12);
   }
 }
 
@@ -771,8 +883,15 @@ body::before {
   .scanlines::before,
   .scanlines::after,
   .noise,
+  .flicker,
+  .terminal-shell,
   .typewriter::after {
     animation: none;
+  }
+
+  /* Without the sweep animation the band would sit parked at the top */
+  .scanlines::before {
+    display: none;
   }
 }
 
@@ -825,23 +944,24 @@ body::before {
    movement of the repeating scanline texture.
    ========================================================================== */
 
-/* Vertical sweep line traveling down the viewport */
+/* Refresh band rolling down the viewport, starting fully above it and
+   ending fully below it (translate % is relative to the band's own height) */
 @keyframes scanline-sweep {
   0% {
-    transform: translate3d(0, -10vh, 0);
+    transform: translate3d(0, -100%, 0);
   }
   100% {
-    transform: translate3d(0, 110vh, 0);
+    transform: translate3d(0, 100vh, 0);
   }
 }
 
-/* Slight movement in the repeating scanline texture */
+/* Raster rows crawling down by exactly one row pitch per cycle */
 @keyframes scanline-texture {
   0% {
     background-position: 0 0;
   }
   100% {
-    background-position: 0 4px;
+    background-position: 0 var(--scanline-pattern-size);
   }
 }
 

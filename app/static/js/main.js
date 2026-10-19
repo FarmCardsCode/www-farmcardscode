@@ -77,15 +77,14 @@ window
 
 updateThemeButton();
 
-// The scanline sweep and noise jitter are full-viewport composites running
-// every frame; neither is worth the cost while the tab is hidden or
-// unfocused, so both pause via html[data-idle] (see style.css) and resume
+// The CRT overlays (scanline sweep, noise, flicker) and the shell jitter are
+// full-viewport composites running every frame. They keep playing while the
+// window is merely unfocused (still visible beside another window), but pause
+// via html[data-idle] (see style.css) while the tab is hidden, and resume
 // exactly where they left off.
 function setIdle(idle) {
   document.documentElement.toggleAttribute("data-idle", idle);
 }
 
-window.addEventListener("blur", () => setIdle(true));
-window.addEventListener("focus", () => setIdle(false));
 document.addEventListener("visibilitychange", () => setIdle(document.hidden));
 setIdle(document.hidden);
